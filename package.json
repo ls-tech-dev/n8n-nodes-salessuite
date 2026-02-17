@@ -1,0 +1,50 @@
+{
+  "name": "@salessuite/n8n-nodes-salessuite",
+  "version": "1.0.4",
+  "description": "Connect n8n with SalesSuite",
+  "keywords": [
+    "n8n-community-node-package",
+    "salessuite"
+  ],
+  "homepage": "https://salessuite.com",
+  "bugs": {
+    "url": "https://salessuite.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ls-tech-dev/n8n-nodes-salessuite.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Fabio Moretti",
+    "email": "office@salessuite.com"
+  },
+  "type": "commonjs",
+  "main": "main.js",
+  "files": [
+    "nodes",
+    "credentials",
+    "README.md",
+    "CREDENTIALS.md",
+    "LICENSE.md"
+  ],
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "engines": {
+    "node": ">=20.15"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "credentials/SalesSuiteApi.credentials.js"
+    ],
+    "nodes": [
+      "nodes/SalesSuite/SalesSuite.node.js",
+      "nodes/SalesSuite/triggers/SalesSuiteTrigger.node.js"
+    ]
+  }
+}

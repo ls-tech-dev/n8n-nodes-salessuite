@@ -1,0 +1,18 @@
+{
+  "node": "n8n-nodes-base.salessuite",
+  "nodeVersion": "1.0.0",
+  "codexVersion": "1.0",
+  "categories": ["Sales", "Communication"],
+  "resources": {
+    "credentialDocumentation": [
+      {
+        "url": "https://api.salessuite.com"
+      }
+    ],
+    "primaryDocumentation": [
+      {
+        "url": "https://api.salessuite.com"
+      }
+    ]
+  }
+}
