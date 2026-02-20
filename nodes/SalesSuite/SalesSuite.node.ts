@@ -12,6 +12,7 @@ import { activityFields, activityOperations } from "./actions/activity";
 import { apiCallFields, apiCallOperations } from "./actions/apiCall";
 import { contactFields, contactOperations } from "./actions/contact";
 import { dealFields, dealOperations } from "./actions/deal";
+import { formFields, formOperations } from "./actions/form";
 import { resourceSelector } from "./actions/resource.selector";
 import { route } from "./actions/router";
 import { webhookFields, webhookOperations } from "./actions/webhook";
@@ -19,6 +20,7 @@ import * as Loaders from "./methods/loadOptions";
 import {
 	getContactResourceMapperFields,
 	getContactResourceMapperFieldsForUpdate,
+	getContactResourceMapperFieldsForUpsert,
 } from "./methods/resourceMappers/contact.resourceMapper";
 import {
 	getDealResourceMapperFields,
@@ -67,6 +69,10 @@ export class SalesSuite implements INodeType {
 			...dealOperations,
 			...dealFields,
 
+			// Form
+			...formOperations,
+			...formFields,
+
 			// Webhook
 			...webhookOperations,
 			...webhookFields,
@@ -84,6 +90,7 @@ export class SalesSuite implements INodeType {
 		resourceMapping: {
 			getContactResourceMapperFields,
 			getContactResourceMapperFieldsForUpdate,
+			getContactResourceMapperFieldsForUpsert,
 			getDealResourceMapperFields,
 			getDealResourceMapperFieldsForUpdate,
 		},

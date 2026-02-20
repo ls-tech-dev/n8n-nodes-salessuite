@@ -4,6 +4,7 @@ import { handleActivity } from "./activity/activity.actions";
 import { handleApiCall } from "./apiCall/apiCall.actions";
 import { handleContact } from "./contact/contact.actions";
 import { handleDeal } from "./deal/deal.actions";
+import { handleForm } from "./form/form.actions";
 import { handleWebhook } from "./webhook/webhook.actions";
 
 export async function route(
@@ -24,6 +25,9 @@ export async function route(
 
 		case "deal":
 			return await handleDeal.call(this, i, operation);
+
+		case "form":
+			return await handleForm.call(this, i, operation);
 
 		case "webhook":
 			return await handleWebhook.call(this, i, operation);

@@ -44,7 +44,9 @@ function getStrictDateConverterConfig(
 	};
 }
 
-function getZapierConfig(locale: string): FixValueForTypeDefinitionConfig {
+function getTypeCoercionConfig(
+	locale: string,
+): FixValueForTypeDefinitionConfig {
 	return {
 		boolean: {
 			typeConverterConfig: {
@@ -262,7 +264,7 @@ export function normalizeValue(
 
 	const fixedValue = createDataFixerForTypeDefinition(
 		typeDef,
-		getZapierConfig(locale),
+		getTypeCoercionConfig(locale),
 	)(value);
 
 	return fixedValue.value;

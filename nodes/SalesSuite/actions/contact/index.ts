@@ -103,33 +103,6 @@ export const contactFields: INodeProperties[] = [
 			},
 		},
 	},
-	{
-		displayName: "Pin Note?",
-		name: "pinInitialNote",
-		type: "boolean",
-		default: false,
-		displayOptions: {
-			show: {
-				resource: ["contact"],
-				operation: ["createContact"],
-				createInitialNote: [true],
-			},
-		},
-	},
-	{
-		displayName: "Bold Note Text?",
-		name: "makeBold",
-		type: "boolean",
-		default: false,
-		displayOptions: {
-			show: {
-				resource: ["contact"],
-				operation: ["createContact"],
-				createInitialNote: [true],
-			},
-		},
-	},
-
 	// ===== UPDATE =====
 	{
 		displayName: "Contact Name or ID",
@@ -182,7 +155,7 @@ export const contactFields: INodeProperties[] = [
 		},
 		typeOptions: {
 			resourceMapper: {
-				resourceMapperMethod: "getContactResourceMapperFields",
+				resourceMapperMethod: "getContactResourceMapperFieldsForUpdate",
 				mode: "add",
 				fieldWords: { singular: "field", plural: "fields" },
 				addAllFields: true,
@@ -215,33 +188,6 @@ export const contactFields: INodeProperties[] = [
 			},
 		},
 	},
-	{
-		displayName: "Pin Note?",
-		name: "pinInitialNote",
-		type: "boolean",
-		default: false,
-		displayOptions: {
-			show: {
-				resource: ["contact"],
-				operation: ["updateContact"],
-				createInitialNote: [true],
-			},
-		},
-	},
-	{
-		displayName: "Bold Note Text?",
-		name: "makeBold",
-		type: "boolean",
-		default: false,
-		displayOptions: {
-			show: {
-				resource: ["contact"],
-				operation: ["updateContact"],
-				createInitialNote: [true],
-			},
-		},
-	},
-
 	// ===== UPSERT =====
 	{
 		displayName:
@@ -265,7 +211,7 @@ export const contactFields: INodeProperties[] = [
 		},
 		typeOptions: {
 			resourceMapper: {
-				resourceMapperMethod: "getContactResourceMapperFields",
+				resourceMapperMethod: "getContactResourceMapperFieldsForUpsert",
 				mode: "upsert",
 				fieldWords: { singular: "field", plural: "fields" },
 				addAllFields: true,

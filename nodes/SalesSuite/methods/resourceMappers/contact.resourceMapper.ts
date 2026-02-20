@@ -90,6 +90,13 @@ export async function getContactResourceMapperFields(
 		addField(prop, "Other");
 	}
 
+	mapped.sort((a, b) => {
+		const aIsContactPerson = a.id.startsWith("contactPerson.");
+		const bIsContactPerson = b.id.startsWith("contactPerson.");
+		if (aIsContactPerson === bIsContactPerson) return 0;
+		return aIsContactPerson ? -1 : 1;
+	});
+
 	return { fields: mapped };
 }
 
@@ -102,6 +109,17 @@ export async function getContactResourceMapperFieldsForUpdate(
 		required: false,
 		canBeUsedToMatch: false,
 		defaultMatch: false,
+	}));
+	return res;
+}
+
+export async function getContactResourceMapperFieldsForUpsert(
+	this: ILoadOptionsFunctions,
+): Promise<ResourceMapperFields> {
+	const res = await getContactResourceMapperFields.call(this);
+	res.fields = res.fields.map((f) => ({
+		...f,
+		required: false,
 	}));
 	return res;
 }

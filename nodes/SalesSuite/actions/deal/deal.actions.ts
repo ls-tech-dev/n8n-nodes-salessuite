@@ -7,7 +7,7 @@ import {
 	normalizeValue,
 	splitPrefixedFields,
 } from "../../helpers/fieldMapping";
-import { createNoteWithOptionalPin } from "../../helpers/notes";
+import { createNote } from "../../helpers/notes";
 
 async function sanitizeDealPayload(this: IExecuteFunctions, raw: unknown) {
 	const maybe = (raw ?? {}) as IDataObject;
@@ -59,11 +59,6 @@ export async function handleDeal(
 				i,
 				false,
 			) as boolean;
-			const pinInitialNote = this.getNodeParameter(
-				"pinInitialNote",
-				i,
-				false,
-			) as boolean;
 			let initialNoteId: string | undefined;
 			if (createInitialNote && result?.deal?.id) {
 				const initialNoteText = this.getNodeParameter(
@@ -71,14 +66,11 @@ export async function handleDeal(
 					i,
 					"",
 				) as string;
-				const makeBold = this.getNodeParameter("makeBold", i, false) as boolean;
 				if (initialNoteText && initialNoteText.trim()) {
-					initialNoteId = await createNoteWithOptionalPin(
+					initialNoteId = await createNote(
 						this,
 						result.deal.id as string,
 						initialNoteText,
-						pinInitialNote,
-						makeBold,
 						"deal",
 					);
 				}
@@ -147,11 +139,6 @@ export async function handleDeal(
 				i,
 				false,
 			) as boolean;
-			const pinInitialNote = this.getNodeParameter(
-				"pinInitialNote",
-				i,
-				false,
-			) as boolean;
 			let initialNoteId: string | undefined;
 			if (createInitialNote) {
 				const initialNoteText = this.getNodeParameter(
@@ -159,14 +146,11 @@ export async function handleDeal(
 					i,
 					"",
 				) as string;
-				const makeBold = this.getNodeParameter("makeBold", i, false) as boolean;
 				if (initialNoteText && initialNoteText.trim()) {
-					initialNoteId = await createNoteWithOptionalPin(
+					initialNoteId = await createNote(
 						this,
 						dealId,
 						initialNoteText,
-						pinInitialNote,
-						makeBold,
 						"deal",
 					);
 				}
@@ -209,6 +193,46 @@ export async function handleDeal(
 		case "getPipelines": {
 			const data = await ssRequest(this, "GET", "/pipelines");
 			return data ?? [];
+		}
+
+		case "getDealsByPipelinePhase": {
+			const pipelineId = this.getNodeParameter("pipelineId", i) as string;
+			const phaseId = this.getNodeParameter("phaseId", i) as string;
+			const pageSize = 100;
+
+			let page = 0;
+			let hasMore = true;
+			const allDeals: IDataObject[] = [];
+
+			while (hasMore) {
+				const deals = ((await ssRequest(this, "GET", "/deal", {
+					qs: { page, pageSize, pipelineId },
+				})) ?? []) as IDataObject[];
+
+				const stageDeals = deals.filter((deal) => deal.phaseId === phaseId);
+				allDeals.push(...stageDeals);
+
+				if (deals.length === pageSize) {
+					page++;
+				} else {
+					hasMore = false;
+				}
+			}
+
+			return allDeals;
+		}
+
+		case "changeDealPipelinePhase": {
+			const dealId = this.getNodeParameter("dealId", i) as string;
+			const pipelineId = this.getNodeParameter("pipelineId", i) as string;
+			const phaseId = this.getNodeParameter("phaseId", i) as string;
+
+			const result = await ssRequest(this, "PATCH", `/deal/${dealId}`, {
+				qs: { pipelineId, phaseId },
+				body: {},
+			});
+
+			return result ?? {};
 		}
 
 		default:

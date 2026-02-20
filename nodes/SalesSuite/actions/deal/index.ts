@@ -9,6 +9,12 @@ export const dealOperations: INodeProperties[] = [
 		displayOptions: { show: { resource: ["deal"] } },
 		options: [
 			{
+				name: "Change Deal Pipeline Phase",
+				value: "changeDealPipelinePhase",
+				description: "Move a deal to a different pipeline and phase",
+				action: "Change deal pipeline phase",
+			},
+			{
 				name: "Create Deal",
 				value: "createDeal",
 				description: "Create a new deal in the system",
@@ -26,6 +32,12 @@ export const dealOperations: INodeProperties[] = [
 				description:
 					"Find all deals linked to the contact owning this email address",
 				action: "Find related deals by email",
+			},
+			{
+				name: "Get Deals by Pipeline Phase",
+				value: "getDealsByPipelinePhase",
+				description: "Fetch all deals in a specific pipeline phase",
+				action: "Get deals by pipeline phase",
 			},
 			{
 				name: "List Deals",
@@ -150,33 +162,6 @@ export const dealFields: INodeProperties[] = [
 		default: "",
 		description: "Plain text note",
 	},
-	{
-		displayName: "Pin Note?",
-		name: "pinInitialNote",
-		type: "boolean",
-		displayOptions: {
-			show: {
-				resource: ["deal"],
-				operation: ["createDeal"],
-				createInitialNote: [true],
-			},
-		},
-		default: false,
-	},
-	{
-		displayName: "Bold Note Text?",
-		name: "makeBold",
-		type: "boolean",
-		displayOptions: {
-			show: {
-				resource: ["deal"],
-				operation: ["createDeal"],
-				createInitialNote: [true],
-			},
-		},
-		default: false,
-	},
-
 	// ===== UPDATE DEAL =====
 	{
 		displayName: "Deal Name or ID",
@@ -322,33 +307,6 @@ export const dealFields: INodeProperties[] = [
 		default: "",
 		description: "Plain text note",
 	},
-	{
-		displayName: "Pin Note?",
-		name: "pinInitialNote",
-		type: "boolean",
-		displayOptions: {
-			show: {
-				resource: ["deal"],
-				operation: ["updateDeal"],
-				createInitialNote: [true],
-			},
-		},
-		default: false,
-	},
-	{
-		displayName: "Bold Note Text?",
-		name: "makeBold",
-		type: "boolean",
-		displayOptions: {
-			show: {
-				resource: ["deal"],
-				operation: ["updateDeal"],
-				createInitialNote: [true],
-			},
-		},
-		default: false,
-	},
-
 	// ===== LIST DEALS =====
 	{
 		displayName: "Page",
@@ -374,5 +332,85 @@ export const dealFields: INodeProperties[] = [
 		default: 25,
 		typeOptions: { minValue: 1 },
 		displayOptions: { show: { resource: ["deal"], operation: ["listDeals"] } },
+	},
+
+	// ===== GET DEALS BY PIPELINE STAGE =====
+	{
+		displayName: "Pipeline Name or ID",
+		name: "pipelineId",
+		type: "options",
+		typeOptions: { loadOptionsMethod: "getPipelines" },
+		displayOptions: {
+			show: { resource: ["deal"], operation: ["getDealsByPipelinePhase"] },
+		},
+		required: true,
+		default: "",
+		description:
+			'Pipeline to filter deals from. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+	},
+	{
+		displayName: "Phase Name or ID",
+		name: "phaseId",
+		type: "options",
+		typeOptions: {
+			loadOptionsMethod: "getStagesByPipeline",
+			loadOptionsDependsOn: ["pipelineId"],
+			reloadOptions: true,
+		},
+		displayOptions: {
+			show: { resource: ["deal"], operation: ["getDealsByPipelinePhase"] },
+		},
+		required: true,
+		default: "",
+		description:
+			'Phase to filter deals by. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+	},
+
+	// ===== CHANGE DEAL PIPELINE PHASE =====
+	{
+		displayName: "Deal Name or ID",
+		name: "dealId",
+		type: "options",
+		typeOptions: {
+			loadOptionsMethod: "getDeals",
+			reloadOptions: true,
+		},
+		required: true,
+		default: "",
+		description:
+			'Deal to move. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		displayOptions: {
+			show: { resource: ["deal"], operation: ["changeDealPipelinePhase"] },
+		},
+	},
+	{
+		displayName: "Pipeline Name or ID",
+		name: "pipelineId",
+		type: "options",
+		typeOptions: { loadOptionsMethod: "getPipelines" },
+		required: true,
+		default: "",
+		description:
+			'Target pipeline. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		displayOptions: {
+			show: { resource: ["deal"], operation: ["changeDealPipelinePhase"] },
+		},
+	},
+	{
+		displayName: "Phase Name or ID",
+		name: "phaseId",
+		type: "options",
+		typeOptions: {
+			loadOptionsMethod: "getStagesByPipeline",
+			loadOptionsDependsOn: ["pipelineId"],
+			reloadOptions: true,
+		},
+		required: true,
+		default: "",
+		description:
+			'Target phase. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		displayOptions: {
+			show: { resource: ["deal"], operation: ["changeDealPipelinePhase"] },
+		},
 	},
 ];

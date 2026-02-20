@@ -28,6 +28,11 @@ export const resourceSelector: INodeProperties = {
 				"Work with deals – from creation to updates and pipeline management",
 		},
 		{
+			name: "Form",
+			value: "form",
+			description: "List forms and retrieve form submissions",
+		},
+		{
 			name: "Webhook",
 			value: "webhook",
 			description: "Manage webhook subscriptions in SalesSuite",

@@ -7,7 +7,7 @@ import {
 	normalizeValue,
 	splitPrefixedFields,
 } from "../../helpers/fieldMapping";
-import { createNoteWithOptionalPin } from "../../helpers/notes";
+import { createNote } from "../../helpers/notes";
 
 async function sanitizeContactPayload(
 	this: IExecuteFunctions,
@@ -62,21 +62,7 @@ async function maybeCreateNote(
 	) as string;
 	if (!initialNoteText?.trim()) return undefined;
 
-	const pinInitialNote = ctx.getNodeParameter(
-		"pinInitialNote",
-		i,
-		false,
-	) as boolean;
-	const makeBold = ctx.getNodeParameter("makeBold", i, false) as boolean;
-
-	return createNoteWithOptionalPin(
-		ctx,
-		contactId,
-		initialNoteText,
-		pinInitialNote,
-		makeBold,
-		"contact",
-	);
+	return createNote(ctx, contactId, initialNoteText, "contact");
 }
 
 function pickEmail(payload: {

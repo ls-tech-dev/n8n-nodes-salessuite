@@ -11,8 +11,15 @@ export const activityOperations: INodeProperties[] = [
 			{
 				name: "Create Note",
 				value: "createNote",
-				action: "Create note on contact",
-				description: "Add an internal note to a contact",
+				action: "Create note on contact or deal",
+				description: "Add an internal note to a contact or deal",
+			},
+			{
+				name: "List Call Types",
+				value: "listCallTypes",
+				action: "List call types",
+				description:
+					"Retrieve all available phone call types including their category",
 			},
 			{
 				name: "List Email Activities",
@@ -23,9 +30,9 @@ export const activityOperations: INodeProperties[] = [
 			{
 				name: "List Phone Call Activities",
 				value: "listPhoneCallActivities",
-				action: "List contact calls",
+				action: "List phone call activities",
 				description:
-					"Retrieve logged phone call activities related to the contact",
+					"Retrieve logged phone call activities for a contact or deal",
 			},
 		],
 		default: "createNote",
@@ -43,11 +50,7 @@ export const activityFields: INodeProperties[] = [
 		displayOptions: {
 			show: {
 				resource: ["activity"],
-				operation: [
-					"createNote",
-					"listEmailActivities",
-					"listPhoneCallActivities",
-				],
+				operation: ["listEmailActivities"],
 			},
 		},
 		description:
@@ -55,6 +58,53 @@ export const activityFields: INodeProperties[] = [
 	},
 
 	// Create Note
+	{
+		displayName: "Attach Note To",
+		name: "noteTarget",
+		type: "options",
+		options: [
+			{ name: "Contact", value: "contact" },
+			{ name: "Deal", value: "deal" },
+		],
+		default: "contact",
+		displayOptions: {
+			show: { resource: ["activity"], operation: ["createNote"] },
+		},
+	},
+	{
+		displayName: "Contact Name or ID",
+		name: "contactId",
+		type: "options",
+		typeOptions: { loadOptionsMethod: "getContacts" },
+		required: true,
+		default: "",
+		displayOptions: {
+			show: {
+				resource: ["activity"],
+				operation: ["createNote"],
+				noteTarget: ["contact"],
+			},
+		},
+		description:
+			'Choose the contact. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+	},
+	{
+		displayName: "Deal Name or ID",
+		name: "dealId",
+		type: "options",
+		typeOptions: { loadOptionsMethod: "getDeals", reloadOptions: true },
+		required: true,
+		default: "",
+		displayOptions: {
+			show: {
+				resource: ["activity"],
+				operation: ["createNote"],
+				noteTarget: ["deal"],
+			},
+		},
+		description:
+			'Choose the deal. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+	},
 	{
 		displayName: "Note Text",
 		name: "noteText",
@@ -66,25 +116,55 @@ export const activityFields: INodeProperties[] = [
 		},
 		description: "Plain text note",
 	},
+	// List Phone Call Activities
 	{
-		displayName: "Pin Note?",
-		name: "pinNote",
-		type: "boolean",
-		default: false,
+		displayName: "Scope",
+		name: "callScope",
+		type: "options",
+		options: [
+			{ name: "Contact", value: "contact" },
+			{ name: "Deal", value: "deal" },
+		],
+		default: "contact",
 		displayOptions: {
-			show: { resource: ["activity"], operation: ["createNote"] },
+			show: { resource: ["activity"], operation: ["listPhoneCallActivities"] },
 		},
+		description: "Whether to retrieve call activities for a contact or a deal",
 	},
 	{
-		displayName: "Bold Text?",
-		name: "makeBold",
-		type: "boolean",
-		default: false,
+		displayName: "Contact Name or ID",
+		name: "contactId",
+		type: "options",
+		typeOptions: { loadOptionsMethod: "getContacts" },
+		required: true,
+		default: "",
 		displayOptions: {
-			show: { resource: ["activity"], operation: ["createNote"] },
+			show: {
+				resource: ["activity"],
+				operation: ["listPhoneCallActivities"],
+				callScope: ["contact"],
+			},
 		},
+		description:
+			'Choose the contact. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
-
+	{
+		displayName: "Deal Name or ID",
+		name: "dealId",
+		type: "options",
+		typeOptions: { loadOptionsMethod: "getDeals", reloadOptions: true },
+		required: true,
+		default: "",
+		displayOptions: {
+			show: {
+				resource: ["activity"],
+				operation: ["listPhoneCallActivities"],
+				callScope: ["deal"],
+			},
+		},
+		description:
+			'Choose the deal. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+	},
 	// List Call Activities Filters
 	{
 		displayName: "Call Type Name or ID",

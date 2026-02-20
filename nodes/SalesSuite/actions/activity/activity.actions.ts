@@ -1,7 +1,7 @@
 import { ApplicationError, IExecuteFunctions } from "n8n-workflow";
 
 import { ssRequest } from "../../helpers/apiclient";
-import { createNoteWithOptionalPin } from "../../helpers/notes";
+import { createNote } from "../../helpers/notes";
 
 export async function handleActivity(
 	this: IExecuteFunctions,
@@ -10,24 +10,26 @@ export async function handleActivity(
 ): Promise<unknown> {
 	switch (operation) {
 		case "createNote": {
-			const contactId = this.getNodeParameter("contactId", i) as string;
+			const noteTarget = this.getNodeParameter("noteTarget", i, "contact") as
+				| "contact"
+				| "deal";
+			const parentId = this.getNodeParameter(
+				noteTarget === "deal" ? "dealId" : "contactId",
+				i,
+			) as string;
 			const noteText = this.getNodeParameter("noteText", i, "") as string;
-			const pinNote = this.getNodeParameter("pinNote", i, false) as boolean;
-			const makeBold = this.getNodeParameter("makeBold", i, false) as boolean;
 
-			const noteId = await createNoteWithOptionalPin(
-				this,
-				contactId,
-				noteText,
-				pinNote,
-				makeBold,
-				"contact",
-			);
+			const noteId = await createNote(this, parentId, noteText, noteTarget);
 			return {
-				parentType: "contact",
-				parentId: contactId,
+				parentType: noteTarget,
+				parentId,
 				noteId: noteId ?? null,
 			};
+		}
+
+		case "listCallTypes": {
+			const data = await ssRequest(this, "GET", "/call-types");
+			return data ?? [];
 		}
 
 		case "listEmailActivities": {
@@ -39,7 +41,15 @@ export async function handleActivity(
 		}
 
 		case "listPhoneCallActivities": {
-			const contactId = this.getNodeParameter("contactId", i) as string;
+			const callScope = this.getNodeParameter(
+				"callScope",
+				i,
+				"contact",
+			) as "contact" | "deal";
+			const parentId = this.getNodeParameter(
+				callScope === "deal" ? "dealId" : "contactId",
+				i,
+			) as string;
 			const callTypeId = (
 				this.getNodeParameter("phoneCallActivityTypeId", i, "") as string
 			).trim();
@@ -47,7 +57,8 @@ export async function handleActivity(
 				this.getNodeParameter("callResult", i, "") as string
 			).trim();
 
-			const body: Record<string, unknown> = { contactId };
+			const body: Record<string, unknown> =
+				callScope === "deal" ? { dealId: parentId } : { contactId: parentId };
 			if (callTypeId && callTypeId !== "any") body.callTypeId = callTypeId;
 			if (callResult && callResult !== "any") {
 				try {
@@ -60,7 +71,7 @@ export async function handleActivity(
 			const data = await ssRequest(this, "POST", "/get-call-activities", {
 				body: body as any,
 			});
-			return { scope: "contact", parentId: contactId, activities: data ?? [] };
+			return { scope: callScope, parentId, activities: data ?? [] };
 		}
 
 		default:

@@ -2,12 +2,10 @@ import { ApplicationError, IExecuteFunctions } from "n8n-workflow";
 
 import { ssRequest } from "./apiclient";
 
-export async function createNoteWithOptionalPin(
+export async function createNote(
 	ctx: IExecuteFunctions,
 	parentId: string,
 	plainText: string,
-	_pin: boolean,
-	_makeBold?: boolean,
 	parentType: "contact" | "deal" = "contact",
 ) {
 	if (!parentId?.trim())

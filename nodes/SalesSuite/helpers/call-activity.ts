@@ -1,8 +1,3 @@
-/**
- * Stub for @poc/common/call-activity from the internal monorepo.
- * Mirrors the Zod discriminated-union schemas used in callactivity.loadOptions.ts.
- */
-
 export type OpeningCallResultNew = {
 	result: string;
 	viaGatekeeper?: boolean;
@@ -23,10 +18,6 @@ type OpeningOptionDef = {
 	_def: { shape: () => OpeningOptionShape };
 };
 
-/**
- * Mirrors openingCallResultSchema from @poc/common/call-activity.
- * Options with a `viaGatekeeper` key in their shape generate two entries (true/false).
- */
 export const openingCallResultSchema: { options: OpeningOptionDef[] } = {
 	options: [
 		{ _def: { shape: () => ({ result: { value: "notReached" } }) } },
