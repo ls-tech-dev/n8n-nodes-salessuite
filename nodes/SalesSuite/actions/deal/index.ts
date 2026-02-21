@@ -27,6 +27,12 @@ export const dealOperations: INodeProperties[] = [
 				action: "Find a deal by ID",
 			},
 			{
+				name: "Find Deals by Contact ID",
+				value: "getDealsByContactId",
+				description: "Find all deals linked to a contact by contact ID",
+				action: "Find deals by contact ID",
+			},
+			{
 				name: "Find Related Deals by Email",
 				value: "findDealsByEmail",
 				description:
@@ -204,6 +210,19 @@ export const dealFields: INodeProperties[] = [
 			"Email address of the contact whose related deals should be returned",
 	},
 	{
+		displayName: "Return All",
+		name: "returnAll",
+		type: "boolean",
+		default: true,
+		description: "Whether to return all results or only up to a given limit",
+		displayOptions: {
+			show: {
+				resource: ["deal"],
+				operation: ["findDealsByEmail"],
+			},
+		},
+	},
+	{
 		displayName: "Update Deal Pipeline/Phase?",
 		name: "updatePipelineStage",
 		type: "boolean",
@@ -364,6 +383,33 @@ export const dealFields: INodeProperties[] = [
 		default: "",
 		description:
 			'Phase to filter deals by. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+	},
+
+	// ===== GET DEALS BY CONTACT ID =====
+	{
+		displayName: "Contact Name or ID",
+		name: "contactId",
+		type: "options",
+		typeOptions: { loadOptionsMethod: "getContacts" },
+		required: true,
+		default: "",
+		displayOptions: {
+			show: { resource: ["deal"], operation: ["getDealsByContactId"] },
+		},
+		description:
+			'Contact whose deals should be returned. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+	},
+	{
+		displayName: "Pipeline Name or ID",
+		name: "pipelineId",
+		type: "options",
+		typeOptions: { loadOptionsMethod: "getPipelines" },
+		default: "",
+		displayOptions: {
+			show: { resource: ["deal"], operation: ["getDealsByContactId"] },
+		},
+		description:
+			'Optional pipeline filter. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 
 	// ===== CHANGE DEAL PIPELINE PHASE =====
