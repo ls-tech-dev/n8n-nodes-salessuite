@@ -153,11 +153,17 @@ export async function handleContact(
 				);
 			}
 
-			const lookup = (await ssRequest(this, "GET", "/contact/by-email", {
+			const lookup = await ssRequest(this, "GET", "/contact/by-email", {
 				qs: { email },
-			})) as Array<any>;
+			});
 
-			const existing = Array.isArray(lookup) ? lookup[0] : null;
+			const existing: any = Array.isArray(lookup)
+				? (lookup[0] ?? null)
+				: lookup && typeof lookup === "object" && !Array.isArray(lookup)
+					? Object.keys(lookup as object).length > 0
+						? lookup
+						: null
+					: null;
 			const contactId = existing?.contact?.id as string | undefined;
 
 			if (contactId) {
@@ -185,17 +191,83 @@ export async function handleContact(
 		}
 
 		case "getByEmail": {
-			const email = this.getNodeParameter("email", i) as string;
+			const email = (this.getNodeParameter("email", i) as string)?.trim();
+			const failIfNotFound = this.getNodeParameter(
+				"failIfNotFound",
+				i,
+				false,
+			) as boolean;
+
+			if (!email) {
+				throw new ApplicationError("Email is required.");
+			}
+
 			const data = await ssRequest(this, "GET", "/contact/by-email", {
 				qs: { email },
 			});
-			return { email, contacts: data ?? [] };
+
+			const entry = Array.isArray(data) && data.length > 0 ? data[0] : null;
+
+			if (!entry) {
+				if (failIfNotFound) {
+					throw new ApplicationError(`No contact found for email: ${email}`);
+				}
+				return [{ email, found: false }];
+			}
+
+			let emailSource: IDataObject | null = null;
+
+			if (
+				entry.mainContactPerson?.email?.toLowerCase() === email.toLowerCase()
+			) {
+				emailSource = {
+					type: "mainContactPerson",
+					id: entry.mainContactPerson.id,
+				};
+			}
+
+			if (!emailSource && Array.isArray(entry.additionalContactPersons)) {
+				const index = entry.additionalContactPersons.findIndex(
+					(p: any) => p?.email?.toLowerCase() === email.toLowerCase(),
+				);
+
+				if (index !== -1) {
+					emailSource = {
+						type: "additionalContactPerson",
+						id: entry.additionalContactPersons[index].id,
+						index,
+					};
+				}
+			}
+
+			return [
+				{
+					email,
+					found: true,
+					emailSource,
+					...entry,
+				},
+			];
 		}
 
 		case "getContactById": {
-			const contactId = this.getNodeParameter("contactId", i) as string;
+			const contactId = (
+				this.getNodeParameter("contactId", i) as string
+			)?.trim();
+
+			if (!contactId) {
+				throw new ApplicationError("contactId is required.");
+			}
+
 			const data = await ssRequest(this, "GET", `/contact/${contactId}`);
-			return { contactId, contact: data ?? null };
+
+			return [
+				{
+					contactId,
+					found: true,
+					...data,
+				},
+			];
 		}
 
 		case "searchContacts": {
