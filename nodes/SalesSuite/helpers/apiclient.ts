@@ -1,11 +1,10 @@
-import {
-	NodeApiError,
-	type IDataObject,
-	type IExecuteFunctions,
-	type IHookFunctions,
-	type IHttpRequestOptions,
-	type ILoadOptionsFunctions,
-	type IWebhookFunctions,
+import type {
+	IDataObject,
+	IExecuteFunctions,
+	IHookFunctions,
+	IHttpRequestOptions,
+	ILoadOptionsFunctions,
+	IWebhookFunctions,
 } from "n8n-workflow";
 
 export type ApiContext =
@@ -50,20 +49,18 @@ export async function ssRequest(
 				filteredQs[key] = val;
 			}
 		}
-		if (Object.keys(filteredQs).length) options.qs = filteredQs;
+		if (Object.keys(filteredQs).length) {
+			options.qs = filteredQs;
+		}
 	}
 
 	if (opts.body !== undefined) {
 		options.body = opts.body as any;
 	}
 
-	try {
-		return await ctx.helpers.httpRequestWithAuthentication.call(
-			ctx,
-			"salesSuiteApi",
-			options,
-		);
-	} catch (error) {
-		throw new NodeApiError(ctx.getNode(), error as any);
-	}
+	return await ctx.helpers.httpRequestWithAuthentication.call(
+		ctx,
+		"salesSuiteApi",
+		options,
+	);
 }
