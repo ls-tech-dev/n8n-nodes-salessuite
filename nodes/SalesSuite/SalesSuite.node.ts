@@ -2,10 +2,11 @@ import {
 	IDataObject,
 	IExecuteFunctions,
 	INodeExecutionData,
-	INodeInputConfiguration,
-	INodeOutputConfiguration,
 	INodeType,
 	INodeTypeDescription,
+	NodeApiError,
+	NodeConnectionTypes,
+	NodeOperationError,
 } from "n8n-workflow";
 
 import { activityFields, activityOperations } from "./actions/activity";
@@ -46,9 +47,14 @@ export class SalesSuite implements INodeType {
 			description:
 				"Interact with the SalesSuite API (powered by agentur-systeme.de)",
 		},
-		inputs: [{ type: "main" } as INodeInputConfiguration],
-		outputs: [{ type: "main" } as INodeOutputConfiguration],
-		credentials: [{ name: "salesSuiteApi", required: true }],
+		inputs: [NodeConnectionTypes.Main],
+		outputs: [NodeConnectionTypes.Main],
+		credentials: [
+			{
+				name: "salesSuiteApi",
+				required: true,
+			},
+		],
 		usableAsTool: true,
 		properties: [
 			resourceSelector,
@@ -98,29 +104,51 @@ export class SalesSuite implements INodeType {
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
-		const returnData: IDataObject[] = [];
+		const returnData: INodeExecutionData[] = [];
 
 		for (let i = 0; i < items.length; i++) {
-			const resource = this.getNodeParameter("resource", i) as string;
-			const operation = this.getNodeParameter("operation", i) as string;
-			const result = (await route.call(
-				this,
-				i,
-				resource,
-				operation,
-			)) as unknown;
+			try {
+				const resource = this.getNodeParameter("resource", i) as string;
+				const operation = this.getNodeParameter("operation", i) as string;
+				const result = (await route.call(
+					this,
+					i,
+					resource,
+					operation,
+				)) as unknown;
 
-			if (Array.isArray(result)) {
-				for (const entry of result) {
-					returnData.push(entry as IDataObject);
+				if (Array.isArray(result)) {
+					for (const entry of result) {
+						returnData.push({
+							json: entry as IDataObject,
+							pairedItem: { item: i },
+						});
+					}
+				} else if (result && typeof result === "object") {
+					returnData.push({
+						json: result as IDataObject,
+						pairedItem: { item: i },
+					});
 				}
-			} else if (result && typeof result === "object") {
-				returnData.push(result as IDataObject);
-			} else {
-				returnData.push({ result } as IDataObject);
+			} catch (error) {
+				if (this.continueOnFail()) {
+					returnData.push({
+						json: items[i].json,
+						error:
+							error instanceof NodeApiError ||
+							error instanceof NodeOperationError
+								? error
+								: new NodeOperationError(this.getNode(), error as Error, {
+										itemIndex: i,
+									}),
+						pairedItem: { item: i },
+					});
+					continue;
+				}
+				throw error;
 			}
 		}
 
-		return [this.helpers.returnJsonArray(returnData)];
+		return [returnData];
 	}
 }
