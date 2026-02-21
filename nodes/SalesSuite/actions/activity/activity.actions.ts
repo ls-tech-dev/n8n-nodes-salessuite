@@ -41,11 +41,9 @@ export async function handleActivity(
 		}
 
 		case "listPhoneCallActivities": {
-			const callScope = this.getNodeParameter(
-				"callScope",
-				i,
-				"contact",
-			) as "contact" | "deal";
+			const callScope = this.getNodeParameter("callScope", i, "contact") as
+				| "contact"
+				| "deal";
 			const parentId = this.getNodeParameter(
 				callScope === "deal" ? "dealId" : "contactId",
 				i,
