@@ -234,6 +234,17 @@ export const contactFields: INodeProperties[] = [
 		},
 	},
 	{
+		displayName: "Fail If Not Found",
+		name: "failIfNotFound",
+		type: "boolean",
+		default: false,
+		displayOptions: {
+			show: { resource: ["contact"], operation: ["getByEmail"] },
+		},
+		description:
+			"Whether to throw an error if no contact is found for the given email",
+	},
+	{
 		displayName: "Search String",
 		name: "searchString",
 		type: "string",
