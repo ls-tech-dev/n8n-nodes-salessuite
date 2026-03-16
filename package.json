@@ -1,5 +1,5 @@
 {
-  "name": "@rjsebening/n8n-nodes-salessuite",
+  "name": "n8n-nodes-salessuite",
   "version": "0.1.1",
   "description": "Connect n8n with SalesSuite (powerd by Jörg Sebening - joergsebening.de)",
   "type": "commonjs",
