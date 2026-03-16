@@ -27,6 +27,26 @@ export async function handleActivity(
 			};
 		}
 
+		case "getCallTypeById": {
+			const callTypeId = (
+				this.getNodeParameter("callTypeId", i) as string
+			)?.trim();
+
+			if (!callTypeId) {
+				throw new ApplicationError("callTypeId is required.");
+			}
+
+			const data = await ssRequest(this, "GET", "/call-types");
+			const list = Array.isArray(data) ? data : [];
+			const match = list.find((ct: { id: string }) => ct.id === callTypeId);
+
+			if (!match) {
+				throw new ApplicationError(`No call type found for ID: ${callTypeId}`);
+			}
+
+			return match;
+		}
+
 		case "listCallTypes": {
 			const data = await ssRequest(this, "GET", "/call-types");
 			return data ?? [];

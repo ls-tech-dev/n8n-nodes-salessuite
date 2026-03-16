@@ -175,57 +175,62 @@ export async function handleDeal(
 		}
 
 		case "getDealsByContactId": {
-		const contactId = (this.getNodeParameter("contactId", i) as string)?.trim();
-		const pipelineId =
-			(this.getNodeParameter("pipelineId", i, "") as string).trim() || undefined;
+			const contactId = (
+				this.getNodeParameter("contactId", i) as string
+			)?.trim();
+			const pipelineId =
+				(this.getNodeParameter("pipelineId", i, "") as string).trim() ||
+				undefined;
 
-		if (!contactId) {
-			throw new ApplicationError("contactId is required.");
-		}
-
-		const pageSize = 100; // fixed internal page size
-		let page = 0;         // SalesSuite is 0-based
-		let hasMore = true;
-
-		const allDeals: IDataObject[] = [];
-
-		while (hasMore) {
-			const data = await ssRequest(
-			this,
-			"GET",
-			`/deal/by-contact/${contactId}`,
-			{ qs: { page, pageSize, pipelineId } },
-			);
-
-			const deals = Array.isArray(data) ? (data as IDataObject[]) : [];
-			allDeals.push(...deals);
-
-			if (deals.length === pageSize) {
-			page++;
-			} else {
-			hasMore = false;
+			if (!contactId) {
+				throw new ApplicationError("contactId is required.");
 			}
-		}
 
-		const count = allDeals.length;
+			const pageSize = 100; // fixed internal page size
+			let page = 0; // SalesSuite is 0-based
+			let hasMore = true;
 
-		if (!count) {
-			return [{
-			contactId,
-			found: false,
-			count: 0,
-			pipelineId: pipelineId ?? null,
-			}];
-		}
+			const allDeals: IDataObject[] = [];
 
-		return allDeals.map((deal, index) => ({
-			contactId,
-			found: true,
-			count,
-			index: index + 1,
-			pipelineId: pipelineId ?? null,
-			...deal,
-		}));
+			while (hasMore) {
+				const data = await ssRequest(
+					this,
+					"GET",
+					`/deal/by-contact/${contactId}`,
+					{ qs: { page, pageSize, pipelineId } },
+				);
+
+				const deals = Array.isArray(data) ? (data as IDataObject[]) : [];
+				allDeals.push(...deals);
+
+				if (deals.length === pageSize) {
+					page++;
+				} else {
+					hasMore = false;
+				}
+			}
+
+			const count = allDeals.length;
+
+			if (!count) {
+				return [
+					{
+						contactId,
+						found: false,
+						count: 0,
+						pipelineId: pipelineId ?? null,
+					},
+				];
+			}
+
+			return allDeals.map((deal, index) => ({
+				contactId,
+				found: true,
+				count,
+				index: index + 1,
+				pipelineId: pipelineId ?? null,
+				...deal,
+			}));
 		}
 
 		case "findDealsByEmail": {

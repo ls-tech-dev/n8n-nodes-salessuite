@@ -48,20 +48,28 @@ function buildFilter(
 	}
 
 	if (type === "activity.created") {
-		filter.activityType = "call";
-		const callTypeId = (
-			ctx.getNodeParameter("callTypeId", i, "") as string
+		const activityType = (
+			ctx.getNodeParameter("activityType", i, "call") as string
 		).trim();
-		const callResult = (
-			ctx.getNodeParameter("callResult", i, "") as string
-		).trim();
-		if (callTypeId && callTypeId !== "any") filter.callTypeId = callTypeId;
-		if (callResult && callResult !== "any") {
-			try {
-				filter.callResult =
-					typeof callResult === "string" ? JSON.parse(callResult) : callResult;
-			} catch {
-				filter.callResult = callResult;
+		filter.activityType = activityType;
+
+		if (activityType === "call") {
+			const callTypeId = (
+				ctx.getNodeParameter("callTypeId", i, "") as string
+			).trim();
+			const callResult = (
+				ctx.getNodeParameter("callResult", i, "") as string
+			).trim();
+			if (callTypeId && callTypeId !== "any") filter.callTypeId = callTypeId;
+			if (callResult && callResult !== "any") {
+				try {
+					filter.callResult =
+						typeof callResult === "string"
+							? JSON.parse(callResult)
+							: callResult;
+				} catch {
+					filter.callResult = callResult;
+				}
 			}
 		}
 	}
@@ -78,6 +86,19 @@ export async function handleWebhook(
 		case "listWebhooks": {
 			const data = await ssRequest(this, "GET", "/webhooks/subscription");
 			return { webhooks: data ?? [] };
+		}
+
+		case "getWebhookById": {
+			const id = (this.getNodeParameter("webhookId", i) as string)?.trim();
+			if (!id) {
+				throw new ApplicationError("webhookId is required.");
+			}
+			const data = await ssRequest(
+				this,
+				"GET",
+				`/webhooks/subscription/${encodeURIComponent(id)}`,
+			);
+			return data ?? {};
 		}
 
 		case "createWebhook": {

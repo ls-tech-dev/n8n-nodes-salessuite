@@ -38,6 +38,11 @@ export const instantProperties: INodeProperties[] = [
 				description: "Triggers when the deal phase changes",
 			},
 			{
+				name: "Email Activity Created",
+				value: "email.activity",
+				description: "Triggers when an email activity is created",
+			},
+			{
 				name: "Form Submitted",
 				value: "form.submitted",
 				description: "Triggers when a form is submitted",

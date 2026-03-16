@@ -82,6 +82,10 @@ function buildFilter(ctx: IHookFunctions, event: string): IDataObject {
 		filter.formId = formId;
 	}
 
+	if (event === "email.activity") {
+		filter.activityType = "email";
+	}
+
 	if (event === "activity.created") {
 		filter.activityType = "call";
 		const callTypeId = (ctx.getNodeParameter("callTypeId", 0) as string) || "";
@@ -190,6 +194,11 @@ export class SalesSuiteTrigger implements INodeType {
 				const selectedEvent = this.getNodeParameter("events", 0) as string;
 				const filter = buildFilter(this, selectedEvent);
 
+				const apiEventType =
+					selectedEvent === "email.activity"
+						? "activity.created"
+						: selectedEvent;
+
 				const res: any = await ssRequest(
 					this as any,
 					"POST",
@@ -197,7 +206,7 @@ export class SalesSuiteTrigger implements INodeType {
 					{
 						body: {
 							hookUrl: webhookUrl,
-							type: selectedEvent,
+							type: apiEventType,
 							filter,
 						},
 					},
@@ -242,6 +251,57 @@ export class SalesSuiteTrigger implements INodeType {
 	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
 		const req = this.getRequestObject();
 		const body = (req.body ?? {}) as IDataObject;
+
+		const selectedEvent = this.getNodeParameter("events", 0) as string;
+
+		if (selectedEvent === "email.activity") {
+			const emailActivity = body.emailActivity as IDataObject | undefined;
+			const content = emailActivity?.content as IDataObject | undefined;
+			if (content?.plateValue) {
+				const extractText = (node: any): string => {
+					if (typeof node.text === "string") return node.text;
+					if (Array.isArray(node.children)) {
+						return node.children.map(extractText).join("");
+					}
+					return "";
+				};
+
+				const nodes = content.plateValue as any[];
+				if (Array.isArray(nodes)) {
+					const text = nodes
+						.map((node) => {
+							if (node.type === "divider") return "---";
+							return extractText(node);
+						})
+						.filter((line) => line.length > 0)
+						.join("\n");
+					(content as IDataObject).plainText = text;
+				}
+			}
+		}
+
+		if (selectedEvent === "activity.created") {
+			const callActivity = body.callActivity as IDataObject | undefined;
+
+			if (callActivity?.callTypeId) {
+				try {
+					const callTypes = (await ssRequest(
+						this as any,
+						"GET",
+						"/call-types",
+					)) as Array<{ id: string; name: string; category: string }>;
+
+					const match = Array.isArray(callTypes)
+						? callTypes.find((ct) => ct.id === callActivity.callTypeId)
+						: undefined;
+
+					if (match) {
+						callActivity.callTypeName = match.name;
+						callActivity.callTypeCategory = match.category;
+					}
+				} catch {}
+			}
+		}
 
 		return {
 			webhookResponse: { body: { ok: true }, responseCode: 200 },

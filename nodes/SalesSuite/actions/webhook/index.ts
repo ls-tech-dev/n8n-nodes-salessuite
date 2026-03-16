@@ -8,21 +8,26 @@ export const webhookOperations: INodeProperties[] = [
 		noDataExpression: true,
 		displayOptions: { show: { resource: ["webhook"] } },
 		options: [
-			{ name: "List Webhooks", value: "listWebhooks", action: "List webhooks" },
 			{
 				name: "Create Webhook",
 				value: "createWebhook",
 				action: "Create a webhook",
 			},
 			{
-				name: "Update Webhook",
-				value: "updateWebhook",
-				action: "Update a webhook",
-			},
-			{
 				name: "Delete Webhook",
 				value: "deleteWebhook",
 				action: "Delete a webhook",
+			},
+			{
+				name: "Get Webhook by ID",
+				value: "getWebhookById",
+				action: "Get a webhook by ID",
+			},
+			{ name: "List Webhooks", value: "listWebhooks", action: "List webhooks" },
+			{
+				name: "Update Webhook",
+				value: "updateWebhook",
+				action: "Update a webhook",
 			},
 		],
 		default: "listWebhooks",
@@ -60,7 +65,7 @@ export const webhookFields: INodeProperties[] = [
 		required: true,
 		default: "",
 		description:
-			'Choose from the list, or specify an ID using an expression. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
 		typeOptions: { loadOptionsMethod: "getWebhookTriggers" },
 		displayOptions: {
 			show: { resource: ["webhook"], operation: ["createWebhook"] },
@@ -147,6 +152,25 @@ export const webhookFields: INodeProperties[] = [
 
 	/** Activity filters */
 	{
+		displayName: "Activity Type",
+		name: "activityType",
+		type: "options",
+		options: [
+			{ name: "Call", value: "call" },
+			{ name: "Email", value: "email" },
+		],
+		default: "call",
+		required: true,
+		displayOptions: {
+			show: {
+				resource: ["webhook"],
+				operation: ["createWebhook"],
+				triggers: ["activity.created"],
+			},
+		},
+		description: "Whether to listen for call or email activities",
+	},
+	{
 		displayName: "Call Type Name or ID",
 		name: "callTypeId",
 		type: "options",
@@ -159,6 +183,7 @@ export const webhookFields: INodeProperties[] = [
 				resource: ["webhook"],
 				operation: ["createWebhook"],
 				triggers: ["activity.created"],
+				activityType: ["call"],
 			},
 		},
 	},
@@ -178,6 +203,7 @@ export const webhookFields: INodeProperties[] = [
 				resource: ["webhook"],
 				operation: ["createWebhook"],
 				triggers: ["activity.created"],
+				activityType: ["call"],
 			},
 		},
 	},
@@ -294,6 +320,24 @@ export const webhookFields: INodeProperties[] = [
 
 	/** Activity filters (update) */
 	{
+		displayName: "Activity Type",
+		name: "activityType",
+		type: "options",
+		options: [
+			{ name: "Call", value: "call" },
+			{ name: "Email", value: "email" },
+		],
+		default: "call",
+		displayOptions: {
+			show: {
+				resource: ["webhook"],
+				operation: ["updateWebhook"],
+				triggers: ["activity.created"],
+			},
+		},
+		description: "Whether to listen for call or email activities",
+	},
+	{
 		displayName: "Call Type Name or ID",
 		name: "callTypeId",
 		type: "options",
@@ -306,6 +350,7 @@ export const webhookFields: INodeProperties[] = [
 				resource: ["webhook"],
 				operation: ["updateWebhook"],
 				triggers: ["activity.created"],
+				activityType: ["call"],
 			},
 		},
 	},
@@ -325,7 +370,23 @@ export const webhookFields: INodeProperties[] = [
 				resource: ["webhook"],
 				operation: ["updateWebhook"],
 				triggers: ["activity.created"],
+				activityType: ["call"],
 			},
+		},
+	},
+
+	/** Get by ID */
+	{
+		displayName: "Webhook Name or ID",
+		name: "webhookId",
+		type: "options",
+		required: true,
+		description:
+			'Choose from the list, or specify an ID using an expression. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		typeOptions: { loadOptionsMethod: "getWebhooksAsOptions" },
+		default: "",
+		displayOptions: {
+			show: { resource: ["webhook"], operation: ["getWebhookById"] },
 		},
 	},
 

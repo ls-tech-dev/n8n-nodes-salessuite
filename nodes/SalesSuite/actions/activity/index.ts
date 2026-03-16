@@ -15,6 +15,12 @@ export const activityOperations: INodeProperties[] = [
 				description: "Add an internal note to a contact or deal",
 			},
 			{
+				name: "Get Call Type by ID",
+				value: "getCallTypeById",
+				action: "Get call type by ID",
+				description: "Retrieve a single call type by its ID",
+			},
+			{
 				name: "List Call Types",
 				value: "listCallTypes",
 				action: "List call types",
@@ -55,6 +61,24 @@ export const activityFields: INodeProperties[] = [
 		},
 		description:
 			'Choose the contact. Choose from the list, or specify an ID using an expression. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+	},
+
+	// Get Call Type by ID
+	{
+		displayName: "Call Type Name or ID",
+		name: "callTypeId",
+		type: "options",
+		typeOptions: { loadOptionsMethod: "loadPhoneCallActivityTypes" },
+		required: true,
+		default: "",
+		displayOptions: {
+			show: {
+				resource: ["activity"],
+				operation: ["getCallTypeById"],
+			},
+		},
+		description:
+			'Choose the call type. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 
 	// Create Note

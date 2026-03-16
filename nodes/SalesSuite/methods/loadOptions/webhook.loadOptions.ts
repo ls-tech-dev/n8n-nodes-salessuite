@@ -9,7 +9,7 @@ import {
 
 type SubscriptionPayload = {
 	id: string;
-	hookUrl: string;
+	url: string;
 	type: string;
 };
 
@@ -42,7 +42,7 @@ export async function getWebhooksAsOptions(this: ILoadOptionsFunctions) {
 	if (!Array.isArray(list) || !list.length)
 		return [{ name: "No Webhooks Found", value: "" }];
 	return list.map((w) => ({
-		name: `${w.hookUrl} (${w.type})`,
+		name: `${w.type} - (${w.id} - ${w.url})`,
 		value: w.id,
 	}));
 }
