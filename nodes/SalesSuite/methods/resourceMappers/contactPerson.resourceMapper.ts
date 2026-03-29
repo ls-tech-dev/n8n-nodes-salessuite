@@ -9,8 +9,8 @@ import {
 	getCardDisplayName,
 	getDisplayName,
 	getTypeDefinition,
-	loadContactFieldData,
-	loadContactProperties,
+	loadContactPersonFieldData,
+	loadContactPersonProperties,
 	prefixKey,
 	sortCardProperties,
 	sortCardsByCreatedAt,
@@ -18,11 +18,11 @@ import {
 import { canUsePropertyAsField } from "./canUsePropertyAsField";
 import { mapTypeToResourceMapper } from "./mapTypeToResourceMapper";
 
-export async function getContactResourceMapperFields(
+export async function getContactPersonResourceMapperFields(
 	this: ILoadOptionsFunctions,
 ): Promise<ResourceMapperFields> {
-	const data = await loadContactFieldData(this);
-	const properties = await loadContactProperties(this);
+	const data = await loadContactPersonFieldData(this);
+	const properties = await loadContactPersonProperties(this);
 	const cards = sortCardsByCreatedAt(
 		Array.isArray(data?.cards) ? data.cards : [],
 	);
@@ -89,26 +89,15 @@ export async function getContactResourceMapperFields(
 	return { fields: mapped };
 }
 
-export async function getContactResourceMapperFieldsForUpdate(
+export async function getContactPersonResourceMapperFieldsForUpdate(
 	this: ILoadOptionsFunctions,
 ): Promise<ResourceMapperFields> {
-	const res = await getContactResourceMapperFields.call(this);
+	const res = await getContactPersonResourceMapperFields.call(this);
 	res.fields = res.fields.map((f) => ({
 		...f,
 		required: false,
 		canBeUsedToMatch: false,
 		defaultMatch: false,
-	}));
-	return res;
-}
-
-export async function getContactResourceMapperFieldsForUpsert(
-	this: ILoadOptionsFunctions,
-): Promise<ResourceMapperFields> {
-	const res = await getContactResourceMapperFields.call(this);
-	res.fields = res.fields.map((f) => ({
-		...f,
-		required: false,
 	}));
 	return res;
 }

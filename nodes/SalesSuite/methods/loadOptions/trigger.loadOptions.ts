@@ -104,6 +104,28 @@ export async function loadForms(
 	}));
 }
 
+type TriggerActionButtonPayload = {
+	dynamicDbTableName: string;
+	propertyDefinitionId: string;
+	propertyIdentifier: string;
+	fieldName: string;
+	shortName: string;
+};
+
+export async function loadTriggerActionButtons(
+	this: ILoadOptionsFunctions,
+): Promise<INodePropertyOptions[]> {
+	const data = (await ssRequest(
+		this,
+		"GET",
+		"/action-button/trigger",
+	)) as TriggerActionButtonPayload[];
+	return (data ?? []).map((b) => ({
+		name: `${b.shortName || b.fieldName} (${b.dynamicDbTableName})`,
+		value: b.propertyDefinitionId,
+	}));
+}
+
 export async function loadPhoneCallActivityTypes(
 	this: ILoadOptionsFunctions,
 ): Promise<INodePropertyOptions[]> {

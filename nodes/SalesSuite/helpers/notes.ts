@@ -2,12 +2,16 @@ import { ApplicationError, IExecuteFunctions } from "n8n-workflow";
 
 import { ssRequest } from "./apiclient";
 
+type NoteResponse = {
+	id?: string;
+};
+
 export async function createNote(
 	ctx: IExecuteFunctions,
 	parentId: string,
 	plainText: string,
 	parentType: "contact" | "deal" = "contact",
-) {
+): Promise<string | undefined> {
 	if (!parentId?.trim())
 		throw new ApplicationError("createNote: parentId is required");
 
@@ -18,12 +22,12 @@ export async function createNote(
 	const qs =
 		parentType === "deal" ? { dealId: parentId } : { contactId: parentId };
 
-	const result = await ssRequest(ctx, "POST", "/note", {
+	const result = await ssRequest<NoteResponse>(ctx, "POST", "/note", {
 		qs,
 		body: noteText,
 		json: false,
 		headers: { "Content-Type": "text/plain" },
 	});
 
-	return result?.id ?? null;
+	return result?.id || undefined;
 }

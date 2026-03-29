@@ -13,7 +13,42 @@ export type ApiContext =
 	| IHookFunctions
 	| IWebhookFunctions;
 
+type RequestWithAuthentication = (
+	credentialType: string,
+	requestOptions: IHttpRequestOptions,
+) => Promise<unknown>;
+
+function hasRequestWithAuthentication(ctx: ApiContext): ctx is ApiContext & {
+	helpers: {
+		httpRequestWithAuthentication: RequestWithAuthentication;
+	};
+} {
+	return typeof ctx.helpers?.httpRequestWithAuthentication === "function";
+}
+
 export async function ssRequest(
+	ctx: ApiContext,
+	method: IHttpRequestOptions["method"],
+	path: string,
+	opts?: {
+		qs?: IDataObject;
+		body?: IDataObject | string;
+		json?: boolean;
+		headers?: Record<string, string>;
+	},
+): Promise<unknown>;
+export async function ssRequest<T>(
+	ctx: ApiContext,
+	method: IHttpRequestOptions["method"],
+	path: string,
+	opts?: {
+		qs?: IDataObject;
+		body?: IDataObject | string;
+		json?: boolean;
+		headers?: Record<string, string>;
+	},
+): Promise<T>;
+export async function ssRequest<T = unknown>(
 	ctx: ApiContext,
 	method: IHttpRequestOptions["method"],
 	path: string,
@@ -23,7 +58,7 @@ export async function ssRequest(
 		json?: boolean;
 		headers?: Record<string, string>;
 	} = {},
-): Promise<any> {
+): Promise<T> {
 	const credentials = await ctx.getCredentials("salesSuiteApi");
 	const apiKey = String(credentials.apiKey || "").trim();
 	const baseUrl = String(credentials.baseUrl || "")
@@ -55,12 +90,16 @@ export async function ssRequest(
 	}
 
 	if (opts.body !== undefined) {
-		options.body = opts.body as any;
+		options.body = opts.body;
 	}
 
-	return await ctx.helpers.httpRequestWithAuthentication.call(
+	if (!hasRequestWithAuthentication(ctx)) {
+		throw new Error("No HTTP helper available");
+	}
+
+	return (await ctx.helpers.httpRequestWithAuthentication.call(
 		ctx,
 		"salesSuiteApi",
 		options,
-	);
+	)) as T;
 }

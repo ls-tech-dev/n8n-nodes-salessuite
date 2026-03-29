@@ -22,6 +22,11 @@ export const resourceSelector: INodeProperties = {
 			description: "Create, update, and manage contacts",
 		},
 		{
+			name: "Contact Person",
+			value: "contactPerson",
+			description: "Retrieve and manage contact persons",
+		},
+		{
 			name: "Deal",
 			value: "deal",
 			description:

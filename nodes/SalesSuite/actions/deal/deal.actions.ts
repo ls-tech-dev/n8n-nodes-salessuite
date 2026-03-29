@@ -9,6 +9,12 @@ import {
 } from "../../helpers/fieldMapping";
 import { createNote } from "../../helpers/notes";
 
+type DealMutationResponse = IDataObject & {
+	deal?: {
+		id?: string;
+	};
+};
+
 async function sanitizeDealPayload(this: IExecuteFunctions, raw: unknown) {
 	const maybe = (raw ?? {}) as IDataObject;
 	const val = (maybe.value ?? maybe) as IDataObject;
@@ -18,7 +24,7 @@ async function sanitizeDealPayload(this: IExecuteFunctions, raw: unknown) {
 	const properties = await loadDealProperties(this);
 	const typeMap = buildTypeMap(properties);
 
-	const out: Record<string, any> & { name?: string } = {};
+	const out: IDataObject & { name?: string } = {};
 	for (const [key, value] of Object.entries(deal)) {
 		const typeDef = typeMap.get(`deal.${key}`);
 		const normalized = normalizeValue(value, typeDef);
@@ -49,10 +55,15 @@ export async function handleDeal(
 				throw new ApplicationError("Create Deal requires a name.");
 			}
 
-			const result = await ssRequest(this, "POST", "/deal", {
-				qs: { pipelineId, contactId, phaseId },
-				body: dataObj,
-			});
+			const result = await ssRequest<DealMutationResponse>(
+				this,
+				"POST",
+				"/deal",
+				{
+					qs: { pipelineId, contactId, phaseId },
+					body: dataObj,
+				},
+			);
 
 			const createInitialNote = this.getNodeParameter(
 				"createInitialNote",
@@ -166,11 +177,11 @@ export async function handleDeal(
 				throw new ApplicationError("dealId is required.");
 			}
 
-			const data = await ssRequest(this, "GET", `/deal/${dealId}`);
+			const data = await ssRequest<IDataObject>(this, "GET", `/deal/${dealId}`);
 
 			return {
 				dealId,
-				...data,
+				...(data ?? {}),
 			};
 		}
 

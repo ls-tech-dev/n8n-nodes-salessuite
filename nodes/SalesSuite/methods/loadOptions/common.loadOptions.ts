@@ -3,8 +3,18 @@ import { ILoadOptionsFunctions, INodePropertyOptions } from "n8n-workflow";
 import { ssRequest } from "../../helpers/apiclient";
 
 type ContactPayload = {
-	contact?: { id?: string; [key: string]: any };
-	mainContactPerson?: { id?: string; [key: string]: any };
+	contact?: {
+		id?: string;
+		firstName?: string;
+		lastName?: string;
+		email?: string;
+	};
+	mainContactPerson?: {
+		id?: string;
+		firstName?: string;
+		lastName?: string;
+		email?: string;
+	};
 };
 
 type DealPayload = {
@@ -80,7 +90,9 @@ export async function getContacts(
 	let search = "";
 	try {
 		search = (this.getNodeParameter("contactSearch", 0) as string) || "";
-	} catch {}
+	} catch {
+		search = "";
+	}
 
 	let data: ContactPayload[] = [];
 

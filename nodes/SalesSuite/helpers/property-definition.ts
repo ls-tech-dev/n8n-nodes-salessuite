@@ -25,8 +25,10 @@ export type FixValueForTypeDefinitionConfig = {
 };
 
 export function createDataFixerForTypeDefinition(
-	_typeDef: TypeDefinition,
-	_config: FixValueForTypeDefinitionConfig,
+	typeDef: TypeDefinition,
+	config: FixValueForTypeDefinitionConfig,
 ): (value: unknown) => { value: unknown } {
+	void typeDef;
+	void config;
 	return (value: unknown) => ({ value });
 }

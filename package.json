@@ -3,34 +3,29 @@
   "version": "0.1.2",
   "description": "Connect n8n with SalesSuite (powerd by Jörg Sebening - joergsebening.de)",
   "type": "commonjs",
-  "keywords": [
-    "n8n-community-node-package",
-    "salessuite"
-  ],
+  "keywords": ["n8n-community-node-package", "salessuite"],
   "license": "MIT",
-  "homepage": "https://github.com/rjsebening/n8n-nodes-salessuite",
-  "author": {
-    "name": "Jörg Sebening",
-    "email": "dev@joerg-sebening.com"
-  },
+  "homepage": "https://github.com/rjsebening/n8n-nodes-salessuite#readme",
+  "author": { "name": "Jörg Sebening", "email": "dev@joerg-sebening.com" },
   "bugs": {
     "url": "https://github.com/rjsebening/n8n-nodes-salessuite/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rjsebening/n8n-nodes-salessuite.git"
+    "url": "https://github.com/rjsebening/n8n-nodes-salessuite.git"
   },
-  "engines": {
-    "node": ">=20.15"
-  },
+  "engines": { "node": ">=20.15" },
   "main": "index.js",
   "scripts": {
     "build": "npx rimraf dist && tsc && gulp build:icons",
     "dev": "tsc --watch",
     "format": "prettier nodes credentials --write",
-    "lint": "eslint nodes credentials --ext .ts",
-    "lint:fix": "eslint nodes credentials --ext .ts --fix",
-    "lint:all": "npm run lint && npm run lint:node"
+    "lint": "eslint nodes credentials package.json",
+    "lint:fix": "eslint nodes credentials package.json --fix",
+    "lint:node": "n8n-node lint",
+    "lint:all": "npm run lint && npm run lint:node",
+    "release": "n8n-node release",
+    "prepublishOnly": "n8n-node prerelease"
   },
   "files": [
     "dist",
@@ -41,30 +36,27 @@
   ],
   "n8n": {
     "n8nNodesApiVersion": 1,
-    "credentials": [
-      "dist/credentials/SalesSuiteApi.credentials.js"
-    ],
+    "strict": true,
+    "credentials": ["dist/credentials/SalesSuiteApi.credentials.js"],
     "nodes": [
       "dist/nodes/SalesSuite/SalesSuite.node.js",
       "dist/nodes/SalesSuite/triggers/SalesSuiteTrigger.node.js"
     ]
   },
   "devDependencies": {
+    "@n8n/node-cli": "^0.23.0",
     "@types/node": "^24.10.1",
-    "@typescript-eslint/parser": "~8.32.0",
-    "conventional-changelog-cli": "^5.0.0",
-    "eslint": "^8.57.0",
+    "@typescript-eslint/parser": "^8.52.0",
+    "eslint": "^9.39.4",
     "eslint-plugin-n8n-nodes-base": "^1.16.3",
     "gulp": "^5.0.1",
+    "gulp-cli": "^3.1.0",
     "package-json-from-dist": "^1.0.1",
-    "prettier": "^3.5.3",
+    "prettier": "^3.8.1",
+    "release-it": "^19.2.4",
     "rimraf": "^6.1.3",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.3"
   },
-  "peerDependencies": {
-    "n8n-workflow": "*"
-  },
-  "publishConfig": {
-    "access": "public"
-  }
+  "peerDependencies": { "n8n-workflow": "*" },
+  "publishConfig": { "access": "public" }
 }

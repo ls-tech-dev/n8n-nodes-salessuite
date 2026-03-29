@@ -9,13 +9,40 @@ import {
 } from "../../helpers/fieldMapping";
 import { createNote } from "../../helpers/notes";
 
+type ContactFields = IDataObject & {
+	email?: string;
+};
+
+type ContactPayload = {
+	contact: ContactFields;
+	contactPerson: ContactFields;
+};
+
+type ContactLookupEntry = IDataObject & {
+	contact?: {
+		id?: string;
+		email?: string;
+	};
+	mainContactPerson?: {
+		id?: string;
+		email?: string;
+	};
+	additionalContactPersons?: Array<{
+		id?: string;
+		email?: string;
+	}>;
+};
+
+type ContactMutationResponse = IDataObject & {
+	contact?: {
+		id?: string;
+	};
+};
+
 async function sanitizeContactPayload(
 	this: IExecuteFunctions,
 	raw: unknown,
-): Promise<{
-	contact: any;
-	contactPerson: any;
-}> {
+): Promise<ContactPayload> {
 	const maybe = (raw ?? {}) as IDataObject;
 	const val = (maybe.value ?? maybe) as IDataObject;
 
@@ -90,9 +117,14 @@ export async function handleContact(
 				);
 			}
 
-			const result = await ssRequest(this, "POST", "/contact/create", {
-				body: payload,
-			});
+			const result = await ssRequest<ContactMutationResponse>(
+				this,
+				"POST",
+				"/contact/create",
+				{
+					body: payload,
+				},
+			);
 
 			const initialNoteId = result?.contact?.id
 				? await maybeCreateNote(this, i, result.contact.id as string)
@@ -115,8 +147,8 @@ export async function handleContact(
 				false,
 			) as boolean;
 			if (!allowChangeEmail) {
-				delete (payload.contact as any)?.email;
-				delete (payload.contactPerson as any)?.email;
+				delete payload.contact.email;
+				delete payload.contactPerson.email;
 			}
 
 			const hasFields =
@@ -153,14 +185,19 @@ export async function handleContact(
 				);
 			}
 
-			const lookup = await ssRequest(this, "GET", "/contact/by-email", {
-				qs: { email },
-			});
+			const lookup = await ssRequest<ContactLookupEntry | ContactLookupEntry[]>(
+				this,
+				"GET",
+				"/contact/by-email",
+				{
+					qs: { email },
+				},
+			);
 
-			const existing: any = Array.isArray(lookup)
+			const existing: ContactLookupEntry | null = Array.isArray(lookup)
 				? (lookup[0] ?? null)
 				: lookup && typeof lookup === "object" && !Array.isArray(lookup)
-					? Object.keys(lookup as object).length > 0
+					? Object.keys(lookup).length > 0
 						? lookup
 						: null
 					: null;
@@ -202,9 +239,14 @@ export async function handleContact(
 				throw new ApplicationError("Email is required.");
 			}
 
-			const data = await ssRequest(this, "GET", "/contact/by-email", {
-				qs: { email },
-			});
+			const data = await ssRequest<ContactLookupEntry[]>(
+				this,
+				"GET",
+				"/contact/by-email",
+				{
+					qs: { email },
+				},
+			);
 
 			const entry = Array.isArray(data) && data.length > 0 ? data[0] : null;
 
@@ -228,7 +270,7 @@ export async function handleContact(
 
 			if (!emailSource && Array.isArray(entry.additionalContactPersons)) {
 				const index = entry.additionalContactPersons.findIndex(
-					(p: any) => p?.email?.toLowerCase() === email.toLowerCase(),
+					(person) => person?.email?.toLowerCase() === email.toLowerCase(),
 				);
 
 				if (index !== -1) {
@@ -259,13 +301,17 @@ export async function handleContact(
 				throw new ApplicationError("contactId is required.");
 			}
 
-			const data = await ssRequest(this, "GET", `/contact/${contactId}`);
+			const data = await ssRequest<IDataObject>(
+				this,
+				"GET",
+				`/contact/${contactId}`,
+			);
 
 			return [
 				{
 					contactId,
 					found: true,
-					...data,
+					...(data ?? {}),
 				},
 			];
 		}

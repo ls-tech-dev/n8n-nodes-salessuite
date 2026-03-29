@@ -6,11 +6,14 @@ import type {
 
 import {
 	type ApiPropertyDefinition,
+	getCardDisplayName,
 	getDisplayName,
 	getTypeDefinition,
 	loadDealFieldData,
 	loadDealProperties,
 	prefixKey,
+	sortCardProperties,
+	sortCardsByCreatedAt,
 } from "../../helpers/fieldMapping";
 import { canUsePropertyAsField } from "./canUsePropertyAsField";
 import { mapTypeToResourceMapper } from "./mapTypeToResourceMapper";
@@ -20,7 +23,9 @@ export async function getDealResourceMapperFields(
 ): Promise<ResourceMapperFields> {
 	const data = await loadDealFieldData(this);
 	const properties = await loadDealProperties(this);
-	const cards = Array.isArray(data?.cards) ? data.cards : [];
+	const cards = sortCardsByCreatedAt(
+		Array.isArray(data?.cards) ? data.cards : [],
+	);
 	const propertiesById = new Map(properties.map((p) => [p.id, p]));
 
 	const mappedByKey = new Map<
@@ -33,9 +38,9 @@ export async function getDealResourceMapperFields(
 		if (!field?.propertyIdentifier) return;
 		if (field.dynamicDbTableName !== "Deal") return;
 		if (field.propertyIdentifier === "name") return;
-		if (!canUsePropertyAsField(field)) return;
 
 		const property = propertiesById.get(field.id) ?? field;
+		if (!canUsePropertyAsField(property)) return;
 		const typeDef = getTypeDefinition(property) ?? getTypeDefinition(field);
 		const typeInfo = mapTypeToResourceMapper(typeDef);
 		const fieldLabel = getDisplayName(field) || getDisplayName(property);
@@ -45,7 +50,7 @@ export async function getDealResourceMapperFields(
 
 		const entry = {
 			id: key,
-			displayName: fieldLabel,
+			displayName: `${fieldLabel} - ${groupLabel}`,
 			required: !!(field.required ?? property.required),
 			canBeUsedToMatch: false,
 			defaultMatch: false,
@@ -63,12 +68,8 @@ export async function getDealResourceMapperFields(
 
 	if (cards.length > 0) {
 		for (const card of cards) {
-			const cardLabel = (
-				card.internalCardName ||
-				card.displayName ||
-				"Card"
-			).toString();
-			for (const field of card.propertyDefinitions ?? []) {
+			const cardLabel = getCardDisplayName(card);
+			for (const field of sortCardProperties(card.propertyDefinitions ?? [])) {
 				addField(field, cardLabel);
 			}
 		}

@@ -2,6 +2,12 @@ import { ApplicationError, IDataObject, IExecuteFunctions } from "n8n-workflow";
 
 import { ssRequest } from "../../helpers/apiclient";
 
+type WebhookSubscriptionResponse = IDataObject & {
+	hookUrl?: string;
+	type?: string;
+	filter?: IDataObject;
+};
+
 function buildFilter(
 	ctx: IExecuteFunctions,
 	i: number,
@@ -53,18 +59,18 @@ function buildFilter(
 		).trim();
 		filter.activityType = activityType;
 
-		if (activityType === "call") {
-			const callTypeId = (
-				ctx.getNodeParameter("callTypeId", i, "") as string
-			).trim();
-			const callResult = (
-				ctx.getNodeParameter("callResult", i, "") as string
-			).trim();
-			if (callTypeId && callTypeId !== "any") filter.callTypeId = callTypeId;
-			if (callResult && callResult !== "any") {
-				try {
-					filter.callResult =
-						typeof callResult === "string"
+			if (activityType === "call") {
+				const callTypeId = (
+					ctx.getNodeParameter("callTypeId", i, "") as string
+				).trim();
+				const callResult = (
+					ctx.getNodeParameter("callResult", i, "") as string
+				).trim();
+				if (callTypeId && callTypeId !== "any") filter.callTypeId = callTypeId;
+				if (callResult && callResult !== "any") {
+					try {
+						filter.callResult =
+							typeof callResult === "string"
 							? JSON.parse(callResult)
 							: callResult;
 				} catch {
@@ -117,7 +123,7 @@ export async function handleWebhook(
 			const url = (this.getNodeParameter("url", i, "") as string).trim();
 			const type = (this.getNodeParameter("triggers", i, "") as string).trim();
 
-			const existing = await ssRequest(
+			const existing = await ssRequest<WebhookSubscriptionResponse>(
 				this,
 				"GET",
 				`/webhooks/subscription/${id}`,
@@ -142,8 +148,8 @@ export async function handleWebhook(
 						type: nextType,
 						filter: Object.keys(filter).length
 							? filter
-							: ((existing?.filter ?? {}) as any),
-					} as any,
+							: (existing?.filter ?? {}),
+					},
 				},
 			);
 			return data ?? {};

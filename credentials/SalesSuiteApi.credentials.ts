@@ -1,13 +1,15 @@
 import type {
 	IAuthenticateGeneric,
 	ICredentialType,
+	Icon,
 	INodeProperties,
 } from "n8n-workflow";
 
 export class SalesSuiteApi implements ICredentialType {
 	name = "salesSuiteApi";
 	displayName = "SalesSuite API";
-	documentationUrl = "https://api.salessuite.com";
+	documentationUrl = "https://github.com/rjsebening/n8n-nodes-salessuite/blob/main/CREDENTIALS.md";
+	icon: Icon = "file:salessuite-icon.svg";
 
 	authenticate: IAuthenticateGeneric = {
 		type: "generic",

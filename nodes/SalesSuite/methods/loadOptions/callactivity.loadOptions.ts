@@ -84,7 +84,7 @@ function toCallResultOption(
 	const type = option.type;
 	switch (type) {
 		case "opening": {
-			const viaGatekeeper = (option.openingResult as any).viaGatekeeper;
+			const viaGatekeeper = option.openingResult.viaGatekeeper;
 			const suffix =
 				viaGatekeeper !== undefined
 					? ` (${viaGatekeeper ? "via gatekeeper" : "direct"})`
@@ -134,12 +134,16 @@ export async function loadCallResultTypes(
 	let callTypeId = "";
 	try {
 		callTypeId = (this.getNodeParameter("callTypeId", 0) as string) || "";
-	} catch {}
+	} catch {
+		callTypeId = "";
+	}
 	if (!callTypeId) {
 		try {
 			callTypeId =
 				(this.getNodeParameter("phoneCallActivityTypeId", 0) as string) || "";
-		} catch {}
+		} catch {
+			callTypeId = "";
+		}
 	}
 
 	const list = (await ssRequest(

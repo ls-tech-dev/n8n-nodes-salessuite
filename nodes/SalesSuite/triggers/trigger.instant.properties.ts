@@ -8,6 +8,11 @@ export const instantProperties: INodeProperties[] = [
 		default: "deal.created",
 		options: [
 			{
+				name: "Action Button Executed",
+				value: "actionButton.executed",
+				description: "Triggers when an action button is executed",
+			},
+			{
 				name: "Call Activity Created",
 				value: "activity.created",
 				description: "Triggers when a call activity is created",
@@ -151,26 +156,53 @@ export const instantProperties: INodeProperties[] = [
 			'Choose from the list, or specify an ID using an expression. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 
-	// ——— CALL ACTIVITY ———
+	/** ---------- Action Button Trigger ---------- */
 	{
-		displayName: "Select Call Type Name or ID",
-		name: "callTypeId",
+		displayName: "Trigger Button Name or ID",
+		name: "actionButtonId",
 		type: "options",
-		typeOptions: { loadOptionsMethod: "loadPhoneCallActivityTypes" },
-		default: "any",
+		typeOptions: { loadOptionsMethod: "loadTriggerActionButtons" },
+		default: "",
+		placeholder: "Select trigger button",
+		displayOptions: { show: { events: ["actionButton.executed"] } },
+		description:
+			'Optional: filter by a specific trigger button. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+	},
+	{
+		displayName: "Action Kind",
+		name: "actionKind",
+		type: "options",
+		default: "trigger",
+		required: true,
+		options: [
+			{ name: "Trigger", value: "trigger" },
+			{ name: "Link Open", value: "link_open" },
+			{ name: "Link Copy", value: "link_copy" },
+		],
+		displayOptions: { show: { events: ["actionButton.executed"] } },
+		description: "The action kind that should trigger the webhook",
+	},
+
+	// ——— CALL ACTIVITY ———
+		{
+			displayName: "Select Call Type Name or ID",
+			name: "callTypeId",
+			type: "options",
+			typeOptions: { loadOptionsMethod: "loadPhoneCallActivityTypes" },
+			default: "any",
 		displayOptions: { show: { events: ["activity.created"] } },
 		description:
 			'Filter by call type or listen to any call. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
-	{
-		displayName: "Call Result Name or ID",
-		name: "callResult",
+		{
+			displayName: "Call Result Name or ID",
+			name: "callResult",
 		type: "options",
 		typeOptions: {
 			loadOptionsMethod: "loadCallResultTypes",
 			loadOptionsDependsOn: ["callTypeId"],
 		},
-		default: "any",
+			default: "any",
 		displayOptions: { show: { events: ["activity.created"] } },
 		description:
 			'Filter by call result or listen to any result. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',

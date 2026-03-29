@@ -39,7 +39,7 @@ function getStrictDateConverterConfig(
 		},
 		fromString: {
 			format: format,
-			emptyString: { severity: "info", replacement: undefined as any },
+			emptyString: { severity: "info", replacement: undefined },
 		},
 	};
 }
@@ -58,7 +58,7 @@ function getTypeCoercionConfig(
 					caseSensitive: false,
 					trueValues: ["true"],
 					falseValues: ["false"],
-					emptyString: { replacement: undefined as any, severity: "silent" },
+					emptyString: { replacement: undefined, severity: "silent" },
 				},
 			},
 		},
@@ -85,7 +85,7 @@ function getTypeCoercionConfig(
 					},
 					currency: "auto",
 					specialNumberConfig: undefined,
-					emptyString: { replacement: undefined as any, severity: "silent" },
+					emptyString: { replacement: undefined, severity: "silent" },
 					onlySignsAsZero: true,
 				},
 			},
@@ -160,8 +160,11 @@ export type ApiPropertyDefinition = {
 	id: string;
 	propertyIdentifier: string;
 	dynamicDbTableName: DynamicDbTableName;
+	cardId?: string | null;
+	createdAt?: string | null;
 	propertyType?: "dynamic" | "system" | string | null;
 	required?: boolean | null;
+	sortIndexInCard?: number | null;
 	dynamicTypeDefinition?: {
 		fieldName?: string;
 		shortName?: string;
@@ -177,20 +180,73 @@ export type ApiPropertyDefinition = {
 	} | null;
 };
 
+export type ApiCardDefinition = {
+	id: string;
+	displayName?: string | null;
+	internalCardName?: string | null;
+	createdAt?: string | null;
+	propertyDefinitions: ApiPropertyDefinition[];
+};
+
 export type FieldApiResponse = {
 	properties: ApiPropertyDefinition[];
-	cards?: Array<{
-		id: string;
-		displayName?: string | null;
-		internalCardName?: string | null;
-		propertyDefinitions: ApiPropertyDefinition[];
-	}>;
+	cards?: ApiCardDefinition[];
 };
+
+const CARD_DISPLAY_NAME_MAP: Record<string, string> = {
+	"dynamicTable.contact.card.contactPerson.displayName": "Contact Person",
+	"dynamicTable.contact.card.coreData.displayName": "Contact",
+	"dynamicTable.contact.card.marketingInformation.displayName":
+		"Marketing Information",
+	"dynamicTable.deal.card.dealProperties.displayName": "Deal Information",
+};
+
+function toTimestamp(value?: string | null): number {
+	if (!value) return Number.MAX_SAFE_INTEGER;
+	const timestamp = Date.parse(value);
+	return Number.isNaN(timestamp) ? Number.MAX_SAFE_INTEGER : timestamp;
+}
+
+export function getCardDisplayName(card: ApiCardDefinition): string {
+	const rawDisplayName = (card.displayName ?? "").trim();
+	if (rawDisplayName) {
+		return CARD_DISPLAY_NAME_MAP[rawDisplayName] ?? rawDisplayName;
+	}
+
+	return "Other";
+}
+
+export function sortCardsByCreatedAt(
+	cards: ApiCardDefinition[],
+): ApiCardDefinition[] {
+	return [...cards].sort(
+		(a, b) => toTimestamp(a.createdAt) - toTimestamp(b.createdAt),
+	);
+}
+
+export function sortCardProperties(
+	properties: ApiPropertyDefinition[],
+): ApiPropertyDefinition[] {
+	return [...properties].sort((a, b) => {
+		const aSortIndex = a.sortIndexInCard ?? Number.MAX_SAFE_INTEGER;
+		const bSortIndex = b.sortIndexInCard ?? Number.MAX_SAFE_INTEGER;
+		if (aSortIndex !== bSortIndex) return aSortIndex - bSortIndex;
+
+		const createdAtDiff = toTimestamp(a.createdAt) - toTimestamp(b.createdAt);
+		if (createdAtDiff !== 0) return createdAtDiff;
+
+		return getDisplayName(a).localeCompare(getDisplayName(b));
+	});
+}
 
 export async function loadContactFieldData(
 	ctx: ILoadOptionsFunctions | IExecuteFunctions,
 ): Promise<FieldApiResponse> {
-	return ssRequest(ctx as any, "GET", "/fields/contact");
+	return (
+		(await ssRequest<FieldApiResponse>(ctx, "GET", "/fields/contact")) ?? {
+			properties: [],
+		}
+	);
 }
 
 export async function loadContactProperties(
@@ -206,10 +262,41 @@ export async function loadContactProperties(
 	);
 }
 
+export async function loadContactPersonFieldData(
+	ctx: ILoadOptionsFunctions | IExecuteFunctions,
+): Promise<FieldApiResponse> {
+	return (
+		(await ssRequest<FieldApiResponse>(
+			ctx,
+			"GET",
+			"/fields/contact-person",
+		)) ?? {
+			properties: [],
+		}
+	);
+}
+
+export async function loadContactPersonProperties(
+	ctx: ILoadOptionsFunctions | IExecuteFunctions,
+): Promise<ApiPropertyDefinition[]> {
+	const data = await loadContactPersonFieldData(ctx);
+	const props = Array.isArray(data?.properties) ? data.properties : [];
+	return props.filter(
+		(p) =>
+			(p.dynamicDbTableName === "Contact" ||
+				p.dynamicDbTableName === "ContactPerson") &&
+			canUsePropertyAsField(p),
+	);
+}
+
 export async function loadDealFieldData(
 	ctx: ILoadOptionsFunctions | IExecuteFunctions,
 ): Promise<FieldApiResponse> {
-	return ssRequest(ctx as any, "GET", "/fields/deal");
+	return (
+		(await ssRequest<FieldApiResponse>(ctx, "GET", "/fields/deal")) ?? {
+			properties: [],
+		}
+	);
 }
 
 export async function loadDealProperties(

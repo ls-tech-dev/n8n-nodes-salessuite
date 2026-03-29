@@ -37,7 +37,7 @@ export function mapTypeToResourceMapper(
 			}),
 		);
 		if (select.variant === "multi") {
-			return { type: "multiOptions" as any, options };
+			return { type: "array", options };
 		}
 		return { type: "options", options };
 	}

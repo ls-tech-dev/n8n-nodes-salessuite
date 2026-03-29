@@ -1,4 +1,9 @@
-import { ApplicationError, IDataObject, IExecuteFunctions } from "n8n-workflow";
+import {
+	ApplicationError,
+	IDataObject,
+	IExecuteFunctions,
+	IHttpRequestOptions,
+} from "n8n-workflow";
 
 import { ssRequest } from "../../helpers/apiclient";
 
@@ -11,6 +16,9 @@ export async function handleApiCall(
 		case "makeRequest": {
 			const method = this.getNodeParameter("httpMethod", i) as string;
 			const endpoint = this.getNodeParameter("endpoint", i) as string;
+			if (!method || !endpoint) {
+				throw new ApplicationError("HTTP method and endpoint are required.");
+			}
 
 			const queryParams = (
 				this.getNodeParameter("queryParameters", i) as IDataObject
@@ -29,7 +37,12 @@ export async function handleApiCall(
 				body = typeof rawBody === "string" ? JSON.parse(rawBody) : rawBody;
 			}
 
-			return ssRequest(this, method as any, endpoint, { qs, body });
+			return ssRequest(
+				this,
+				method as IHttpRequestOptions["method"],
+				endpoint,
+				{ qs, body },
+			);
 		}
 
 		default:

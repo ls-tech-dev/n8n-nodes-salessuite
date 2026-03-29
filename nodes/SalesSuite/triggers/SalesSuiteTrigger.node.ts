@@ -1,11 +1,11 @@
 import {
 	IDataObject,
 	IHookFunctions,
-	INodeOutputConfiguration,
 	INodeType,
 	INodeTypeDescription,
 	IWebhookFunctions,
 	IWebhookResponseData,
+	NodeConnectionTypes,
 	NodeOperationError,
 } from "n8n-workflow";
 
@@ -20,8 +20,41 @@ import {
 	loadForms,
 	loadPipelines,
 	loadStages,
+	loadTriggerActionButtons,
 } from "../methods/loadOptions/trigger.loadOptions";
 import { instantProperties } from "./trigger.instant.properties";
+
+type TriggerStaticData = {
+	subscriptionId?: string;
+};
+
+type ApiErrorLike = {
+	httpCode?: string | number;
+	response?: {
+		statusCode?: number;
+	};
+};
+
+type WebhookSubscriptionResponse = IDataObject & {
+	id?: string;
+};
+
+type PlateNode = {
+	type?: string;
+	text?: string;
+	children?: PlateNode[];
+};
+
+type CallTypePayload = {
+	id: string;
+	name: string;
+	category: string;
+};
+
+function isNotFoundError(error: unknown): boolean {
+	const apiError = error as ApiErrorLike;
+	return apiError.httpCode === "404" || apiError.response?.statusCode === 404;
+}
 
 function buildFilter(ctx: IHookFunctions, event: string): IDataObject {
 	const filter: IDataObject = {};
@@ -86,19 +119,36 @@ function buildFilter(ctx: IHookFunctions, event: string): IDataObject {
 		filter.activityType = "email";
 	}
 
-	if (event === "activity.created") {
-		filter.activityType = "call";
-		const callTypeId = (ctx.getNodeParameter("callTypeId", 0) as string) || "";
-		if (callTypeId && callTypeId !== "any") {
-			filter.callTypeId = callTypeId;
+	if (event === "actionButton.executed") {
+		const actionButtonId =
+			(ctx.getNodeParameter("actionButtonId", 0) as string) || "";
+		if (actionButtonId) {
+			filter.propertyDefinitionId = actionButtonId;
 		}
 
-		const callResultRaw =
-			(ctx.getNodeParameter("callResult", 0) as string) || "";
-		if (callResultRaw && callResultRaw !== "any") {
-			try {
-				filter.callResult =
-					typeof callResultRaw === "string"
+		const actionKind = (ctx.getNodeParameter("actionKind", 0) as string) || "";
+		if (!actionKind) {
+			throw new NodeOperationError(
+				ctx.getNode(),
+				"Please select an action kind.",
+			);
+		}
+		filter.actionKind = actionKind;
+	}
+
+		if (event === "activity.created") {
+			filter.activityType = "call";
+			const callTypeId = (ctx.getNodeParameter("callTypeId", 0) as string) || "";
+			if (callTypeId && callTypeId !== "any") {
+				filter.callTypeId = callTypeId;
+			}
+
+			const callResultRaw =
+				(ctx.getNodeParameter("callResult", 0) as string) || "";
+			if (callResultRaw && callResultRaw !== "any") {
+				try {
+					filter.callResult =
+						typeof callResultRaw === "string"
 						? JSON.parse(callResultRaw)
 						: callResultRaw;
 			} catch {
@@ -133,6 +183,7 @@ export class SalesSuiteTrigger implements INodeType {
 				"Interact with the SalesSuite API (powered by agentur-systeme.de)",
 		},
 		credentials: [{ name: "salesSuiteApi", required: true }],
+		usableAsTool: true,
 		webhooks: [
 			{
 				name: "default",
@@ -143,7 +194,7 @@ export class SalesSuiteTrigger implements INodeType {
 			},
 		],
 		inputs: [],
-		outputs: [{ type: "main" } as INodeOutputConfiguration],
+		outputs: [NodeConnectionTypes.Main],
 		properties: instantProperties,
 	};
 
@@ -156,25 +207,28 @@ export class SalesSuiteTrigger implements INodeType {
 			getForms: loadForms,
 			loadPhoneCallActivityTypes,
 			loadCallResultTypes,
+			loadTriggerActionButtons,
 		},
 	};
 
 	webhookMethods = {
 		default: {
 			async checkExists(this: IHookFunctions): Promise<boolean> {
-				const webhookData = this.getWorkflowStaticData("node");
+				const webhookData = this.getWorkflowStaticData(
+					"node",
+				) as TriggerStaticData;
 				const id = webhookData.subscriptionId as string | undefined;
 				if (!id) return false;
 
 				try {
 					await ssRequest(
-						this as any,
+						this,
 						"GET",
 						`/webhooks/subscription/${encodeURIComponent(id)}`,
 					);
 					return true;
-				} catch (e: any) {
-					if (e?.httpCode === "404" || e?.response?.statusCode === 404) {
+				} catch (e) {
+					if (isNotFoundError(e)) {
 						delete webhookData.subscriptionId;
 						return false;
 					}
@@ -199,8 +253,8 @@ export class SalesSuiteTrigger implements INodeType {
 						? "activity.created"
 						: selectedEvent;
 
-				const res: any = await ssRequest(
-					this as any,
+				const res = await ssRequest<WebhookSubscriptionResponse>(
+					this,
 					"POST",
 					"/webhooks/subscription",
 					{
@@ -220,24 +274,28 @@ export class SalesSuiteTrigger implements INodeType {
 					);
 				}
 
-				const webhookData = this.getWorkflowStaticData("node");
+				const webhookData = this.getWorkflowStaticData(
+					"node",
+				) as TriggerStaticData;
 				webhookData.subscriptionId = res.id;
 				return true;
 			},
 
 			async delete(this: IHookFunctions): Promise<boolean> {
-				const webhookData = this.getWorkflowStaticData("node");
+				const webhookData = this.getWorkflowStaticData(
+					"node",
+				) as TriggerStaticData;
 				const id = webhookData.subscriptionId as string | undefined;
 				if (!id) return true;
 
 				try {
 					await ssRequest(
-						this as any,
+						this,
 						"DELETE",
 						`/webhooks/subscription/${encodeURIComponent(id)}`,
 					);
-				} catch (e: any) {
-					if (e?.httpCode !== "404" && e?.response?.statusCode !== 404) {
+				} catch (e) {
+					if (!isNotFoundError(e)) {
 						throw e;
 					}
 				}
@@ -258,7 +316,7 @@ export class SalesSuiteTrigger implements INodeType {
 			const emailActivity = body.emailActivity as IDataObject | undefined;
 			const content = emailActivity?.content as IDataObject | undefined;
 			if (content?.plateValue) {
-				const extractText = (node: any): string => {
+				const extractText = (node: PlateNode): string => {
 					if (typeof node.text === "string") return node.text;
 					if (Array.isArray(node.children)) {
 						return node.children.map(extractText).join("");
@@ -266,7 +324,7 @@ export class SalesSuiteTrigger implements INodeType {
 					return "";
 				};
 
-				const nodes = content.plateValue as any[];
+				const nodes = content.plateValue as PlateNode[];
 				if (Array.isArray(nodes)) {
 					const text = nodes
 						.map((node) => {
@@ -285,11 +343,11 @@ export class SalesSuiteTrigger implements INodeType {
 
 			if (callActivity?.callTypeId) {
 				try {
-					const callTypes = (await ssRequest(
-						this as any,
+					const callTypes = await ssRequest<CallTypePayload[]>(
+						this,
 						"GET",
 						"/call-types",
-					)) as Array<{ id: string; name: string; category: string }>;
+					);
 
 					const match = Array.isArray(callTypes)
 						? callTypes.find((ct) => ct.id === callActivity.callTypeId)
@@ -299,7 +357,9 @@ export class SalesSuiteTrigger implements INodeType {
 						callActivity.callTypeName = match.name;
 						callActivity.callTypeCategory = match.category;
 					}
-				} catch {}
+				} catch {
+					// Ignore enrichment errors and continue with the original payload.
+				}
 			}
 		}
 

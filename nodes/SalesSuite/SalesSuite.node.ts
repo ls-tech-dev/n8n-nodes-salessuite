@@ -12,6 +12,10 @@ import {
 import { activityFields, activityOperations } from "./actions/activity";
 import { apiCallFields, apiCallOperations } from "./actions/apiCall";
 import { contactFields, contactOperations } from "./actions/contact";
+import {
+	contactPersonFields,
+	contactPersonOperations,
+} from "./actions/contact-person";
 import { dealFields, dealOperations } from "./actions/deal";
 import { formFields, formOperations } from "./actions/form";
 import { resourceSelector } from "./actions/resource.selector";
@@ -23,6 +27,10 @@ import {
 	getContactResourceMapperFieldsForUpdate,
 	getContactResourceMapperFieldsForUpsert,
 } from "./methods/resourceMappers/contact.resourceMapper";
+import {
+	getContactPersonResourceMapperFields,
+	getContactPersonResourceMapperFieldsForUpdate,
+} from "./methods/resourceMappers/contactPerson.resourceMapper";
 import {
 	getDealResourceMapperFields,
 	getDealResourceMapperFieldsForUpdate,
@@ -71,6 +79,10 @@ export class SalesSuite implements INodeType {
 			...contactOperations,
 			...contactFields,
 
+			// Contact Person
+			...contactPersonOperations,
+			...contactPersonFields,
+
 			// Deal
 			...dealOperations,
 			...dealFields,
@@ -97,6 +109,8 @@ export class SalesSuite implements INodeType {
 			getContactResourceMapperFields,
 			getContactResourceMapperFieldsForUpdate,
 			getContactResourceMapperFieldsForUpsert,
+			getContactPersonResourceMapperFields,
+			getContactPersonResourceMapperFieldsForUpdate,
 			getDealResourceMapperFields,
 			getDealResourceMapperFieldsForUpdate,
 		},
