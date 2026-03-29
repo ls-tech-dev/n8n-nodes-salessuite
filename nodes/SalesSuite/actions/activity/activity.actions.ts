@@ -75,13 +75,13 @@ export async function handleActivity(
 				this.getNodeParameter("callResult", i, "") as string
 			).trim();
 
-				const body: IDataObject =
-					callScope === "deal" ? { dealId: parentId } : { contactId: parentId };
-				if (callTypeId && callTypeId !== "any") body.callTypeId = callTypeId;
-				if (callResult && callResult !== "any") {
-					try {
-						body.callResult = JSON.parse(callResult);
-					} catch {
+			const body: IDataObject =
+				callScope === "deal" ? { dealId: parentId } : { contactId: parentId };
+			if (callTypeId && callTypeId !== "any") body.callTypeId = callTypeId;
+			if (callResult && callResult !== "any") {
+				try {
+					body.callResult = JSON.parse(callResult);
+				} catch {
 					body.callResult = callResult;
 				}
 			}

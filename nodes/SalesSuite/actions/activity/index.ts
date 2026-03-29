@@ -190,27 +190,27 @@ export const activityFields: INodeProperties[] = [
 			'Choose the deal. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	// List Call Activities Filters
-		{
-			displayName: "Call Type Name or ID",
-			name: "phoneCallActivityTypeId",
-			type: "options",
-			typeOptions: { loadOptionsMethod: "loadPhoneCallActivityTypes" },
-			default: "any",
+	{
+		displayName: "Call Type Name or ID",
+		name: "phoneCallActivityTypeId",
+		type: "options",
+		typeOptions: { loadOptionsMethod: "loadPhoneCallActivityTypes" },
+		default: "any",
 		displayOptions: {
 			show: { resource: ["activity"], operation: ["listPhoneCallActivities"] },
 		},
 		description:
 			'Optional filter by call type. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
-		{
-			displayName: "Call Result Name or ID",
-			name: "callResult",
+	{
+		displayName: "Call Result Name or ID",
+		name: "callResult",
 		type: "options",
 		typeOptions: {
 			loadOptionsMethod: "loadCallResultTypes",
 			loadOptionsDependsOn: ["phoneCallActivityTypeId"],
 		},
-			default: "any",
+		default: "any",
 		displayOptions: {
 			show: { resource: ["activity"], operation: ["listPhoneCallActivities"] },
 		},

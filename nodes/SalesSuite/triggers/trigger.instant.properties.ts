@@ -184,25 +184,25 @@ export const instantProperties: INodeProperties[] = [
 	},
 
 	// ——— CALL ACTIVITY ———
-		{
-			displayName: "Select Call Type Name or ID",
-			name: "callTypeId",
-			type: "options",
-			typeOptions: { loadOptionsMethod: "loadPhoneCallActivityTypes" },
-			default: "any",
+	{
+		displayName: "Select Call Type Name or ID",
+		name: "callTypeId",
+		type: "options",
+		typeOptions: { loadOptionsMethod: "loadPhoneCallActivityTypes" },
+		default: "any",
 		displayOptions: { show: { events: ["activity.created"] } },
 		description:
 			'Filter by call type or listen to any call. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
-		{
-			displayName: "Call Result Name or ID",
-			name: "callResult",
+	{
+		displayName: "Call Result Name or ID",
+		name: "callResult",
 		type: "options",
 		typeOptions: {
 			loadOptionsMethod: "loadCallResultTypes",
 			loadOptionsDependsOn: ["callTypeId"],
 		},
-			default: "any",
+		default: "any",
 		displayOptions: { show: { events: ["activity.created"] } },
 		description:
 			'Filter by call result or listen to any result. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',

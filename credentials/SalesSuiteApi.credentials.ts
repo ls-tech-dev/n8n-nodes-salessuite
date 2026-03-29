@@ -8,7 +8,8 @@ import type {
 export class SalesSuiteApi implements ICredentialType {
 	name = "salesSuiteApi";
 	displayName = "SalesSuite API";
-	documentationUrl = "https://github.com/rjsebening/n8n-nodes-salessuite/blob/main/CREDENTIALS.md";
+	documentationUrl =
+		"https://github.com/rjsebening/n8n-nodes-salessuite/blob/main/CREDENTIALS.md";
 	icon: Icon = "file:salessuite-icon.svg";
 
 	authenticate: IAuthenticateGeneric = {

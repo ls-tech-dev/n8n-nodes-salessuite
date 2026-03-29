@@ -136,19 +136,19 @@ function buildFilter(ctx: IHookFunctions, event: string): IDataObject {
 		filter.actionKind = actionKind;
 	}
 
-		if (event === "activity.created") {
-			filter.activityType = "call";
-			const callTypeId = (ctx.getNodeParameter("callTypeId", 0) as string) || "";
-			if (callTypeId && callTypeId !== "any") {
-				filter.callTypeId = callTypeId;
-			}
+	if (event === "activity.created") {
+		filter.activityType = "call";
+		const callTypeId = (ctx.getNodeParameter("callTypeId", 0) as string) || "";
+		if (callTypeId && callTypeId !== "any") {
+			filter.callTypeId = callTypeId;
+		}
 
-			const callResultRaw =
-				(ctx.getNodeParameter("callResult", 0) as string) || "";
-			if (callResultRaw && callResultRaw !== "any") {
-				try {
-					filter.callResult =
-						typeof callResultRaw === "string"
+		const callResultRaw =
+			(ctx.getNodeParameter("callResult", 0) as string) || "";
+		if (callResultRaw && callResultRaw !== "any") {
+			try {
+				filter.callResult =
+					typeof callResultRaw === "string"
 						? JSON.parse(callResultRaw)
 						: callResultRaw;
 			} catch {

@@ -59,18 +59,18 @@ function buildFilter(
 		).trim();
 		filter.activityType = activityType;
 
-			if (activityType === "call") {
-				const callTypeId = (
-					ctx.getNodeParameter("callTypeId", i, "") as string
-				).trim();
-				const callResult = (
-					ctx.getNodeParameter("callResult", i, "") as string
-				).trim();
-				if (callTypeId && callTypeId !== "any") filter.callTypeId = callTypeId;
-				if (callResult && callResult !== "any") {
-					try {
-						filter.callResult =
-							typeof callResult === "string"
+		if (activityType === "call") {
+			const callTypeId = (
+				ctx.getNodeParameter("callTypeId", i, "") as string
+			).trim();
+			const callResult = (
+				ctx.getNodeParameter("callResult", i, "") as string
+			).trim();
+			if (callTypeId && callTypeId !== "any") filter.callTypeId = callTypeId;
+			if (callResult && callResult !== "any") {
+				try {
+					filter.callResult =
+						typeof callResult === "string"
 							? JSON.parse(callResult)
 							: callResult;
 				} catch {

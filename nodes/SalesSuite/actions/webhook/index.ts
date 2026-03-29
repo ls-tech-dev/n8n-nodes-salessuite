@@ -170,12 +170,12 @@ export const webhookFields: INodeProperties[] = [
 		},
 		description: "Whether to listen for call or email activities",
 	},
-		{
-			displayName: "Call Type Name or ID",
-			name: "callTypeId",
-			type: "options",
-			typeOptions: { loadOptionsMethod: "loadPhoneCallActivityTypes" },
-			default: "any",
+	{
+		displayName: "Call Type Name or ID",
+		name: "callTypeId",
+		type: "options",
+		typeOptions: { loadOptionsMethod: "loadPhoneCallActivityTypes" },
+		default: "any",
 		description:
 			'Optional filter by call type. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		displayOptions: {
@@ -187,15 +187,15 @@ export const webhookFields: INodeProperties[] = [
 			},
 		},
 	},
-		{
-			displayName: "Call Result Name or ID",
-			name: "callResult",
+	{
+		displayName: "Call Result Name or ID",
+		name: "callResult",
 		type: "options",
 		typeOptions: {
 			loadOptionsMethod: "loadCallResultTypes",
 			loadOptionsDependsOn: ["callTypeId"],
 		},
-			default: "any",
+		default: "any",
 		description:
 			'Optional filter by call result. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		displayOptions: {
@@ -337,12 +337,12 @@ export const webhookFields: INodeProperties[] = [
 		},
 		description: "Whether to listen for call or email activities",
 	},
-		{
-			displayName: "Call Type Name or ID",
-			name: "callTypeId",
-			type: "options",
-			typeOptions: { loadOptionsMethod: "loadPhoneCallActivityTypes" },
-			default: "any",
+	{
+		displayName: "Call Type Name or ID",
+		name: "callTypeId",
+		type: "options",
+		typeOptions: { loadOptionsMethod: "loadPhoneCallActivityTypes" },
+		default: "any",
 		description:
 			'Optional filter by call type. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		displayOptions: {
@@ -354,15 +354,15 @@ export const webhookFields: INodeProperties[] = [
 			},
 		},
 	},
-		{
-			displayName: "Call Result Name or ID",
-			name: "callResult",
+	{
+		displayName: "Call Result Name or ID",
+		name: "callResult",
 		type: "options",
 		typeOptions: {
 			loadOptionsMethod: "loadCallResultTypes",
 			loadOptionsDependsOn: ["callTypeId"],
 		},
-			default: "any",
+		default: "any",
 		description:
 			'Optional filter by call result. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		displayOptions: {
