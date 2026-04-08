@@ -38,6 +38,11 @@ export async function handleActivity(
 
 			const data = await ssRequest(this, "GET", "/call-types");
 			const list = Array.isArray(data) ? data : [];
+
+			if (callTypeId === "any") {
+				return list;
+			}
+
 			const match = list.find((ct: { id: string }) => ct.id === callTypeId);
 
 			if (!match) {

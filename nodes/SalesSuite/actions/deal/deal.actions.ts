@@ -189,6 +189,7 @@ export async function handleDeal(
 			const contactId = (
 				this.getNodeParameter("contactId", i) as string
 			)?.trim();
+			const returnAll = this.getNodeParameter("returnAll", i, true) as boolean;
 			const additionalOptions = this.getNodeParameter(
 				"additionalOptions",
 				i,
@@ -201,10 +202,48 @@ export async function handleDeal(
 				throw new ApplicationError("contactId is required.");
 			}
 
-			const pageSize = 100; // fixed internal page size
-			let page = 0; // SalesSuite is 0-based
-			let hasMore = true;
+			if (!returnAll) {
+				const page = this.getNodeParameter("page", i, 0) as number;
+				const pageSize = this.getNodeParameter("pageSize", i, 25) as number;
 
+				const data = await ssRequest(
+					this,
+					"GET",
+					`/deal/by-contact/${contactId}`,
+					{ qs: { page, pageSize, pipelineId } },
+				);
+
+				const deals = Array.isArray(data) ? (data as IDataObject[]) : [];
+				const count = deals.length;
+
+				if (!count) {
+					return [
+						{
+							contactId,
+							found: false,
+							count: 0,
+							page,
+							pageSize,
+							pipelineId: pipelineId ?? null,
+						},
+					];
+				}
+
+				return deals.map((deal, index) => ({
+					contactId,
+					found: true,
+					count,
+					index: index + 1,
+					page,
+					pageSize,
+					pipelineId: pipelineId ?? null,
+					...deal,
+				}));
+			}
+
+			const pageSize = 100;
+			let page = 0;
+			let hasMore = true;
 			const allDeals: IDataObject[] = [];
 
 			while (hasMore) {
@@ -229,12 +268,7 @@ export async function handleDeal(
 
 			if (!count) {
 				return [
-					{
-						contactId,
-						found: false,
-						count: 0,
-						pipelineId: pipelineId ?? null,
-					},
+					{ contactId, found: false, count: 0, pipelineId: pipelineId ?? null },
 				];
 			}
 

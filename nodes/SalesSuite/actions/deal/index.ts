@@ -400,6 +400,46 @@ export const dealFields: INodeProperties[] = [
 			'Contact whose deals should be returned. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	{
+		displayName: "Return All",
+		name: "returnAll",
+		type: "boolean",
+		default: true,
+		description: "Whether to return all results or only up to a given limit",
+		displayOptions: {
+			show: { resource: ["deal"], operation: ["getDealsByContactId"] },
+		},
+	},
+	{
+		displayName: "Page",
+		name: "page",
+		type: "number",
+		default: 0,
+		typeOptions: { minValue: 0 },
+		description: "Page number to fetch (0-based)",
+		displayOptions: {
+			show: {
+				resource: ["deal"],
+				operation: ["getDealsByContactId"],
+				returnAll: [false],
+			},
+		},
+	},
+	{
+		displayName: "Page Size",
+		name: "pageSize",
+		type: "number",
+		default: 25,
+		typeOptions: { minValue: 1 },
+		description: "Number of deals to return per page",
+		displayOptions: {
+			show: {
+				resource: ["deal"],
+				operation: ["getDealsByContactId"],
+				returnAll: [false],
+			},
+		},
+	},
+	{
 		displayName: "Additional Options",
 		name: "additionalOptions",
 		type: "collection",
