@@ -189,9 +189,13 @@ export async function handleDeal(
 			const contactId = (
 				this.getNodeParameter("contactId", i) as string
 			)?.trim();
+			const additionalOptions = this.getNodeParameter(
+				"additionalOptions",
+				i,
+				{},
+			) as IDataObject;
 			const pipelineId =
-				(this.getNodeParameter("pipelineId", i, "") as string).trim() ||
-				undefined;
+				((additionalOptions.pipelineId as string) ?? "").trim() || undefined;
 
 			if (!contactId) {
 				throw new ApplicationError("contactId is required.");

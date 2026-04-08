@@ -5,6 +5,8 @@ import {
 	INodeTypeDescription,
 	IWebhookFunctions,
 	IWebhookResponseData,
+	JsonObject,
+	NodeApiError,
 	NodeConnectionTypes,
 	NodeOperationError,
 } from "n8n-workflow";
@@ -37,6 +39,7 @@ type ApiErrorLike = {
 
 type WebhookSubscriptionResponse = IDataObject & {
 	id?: string;
+	hookUrl?: string;
 };
 
 type PlateNode = {
@@ -221,18 +224,28 @@ export class SalesSuiteTrigger implements INodeType {
 				if (!id) return false;
 
 				try {
-					await ssRequest(
+					const remote = await ssRequest<WebhookSubscriptionResponse>(
 						this,
 						"GET",
 						`/webhooks/subscription/${encodeURIComponent(id)}`,
 					);
+
+					// If the registered URL no longer matches, force re-registration
+					const currentUrl = this.getNodeWebhookUrl("default");
+					if (remote?.hookUrl && remote.hookUrl !== currentUrl) {
+						delete webhookData.subscriptionId;
+						return false;
+					}
+
 					return true;
 				} catch (e) {
 					if (isNotFoundError(e)) {
 						delete webhookData.subscriptionId;
 						return false;
 					}
-					throw e;
+					throw new NodeApiError(this.getNode(), e as JsonObject, {
+						message: "Failed to verify existing webhook subscription",
+					});
 				}
 			},
 
@@ -253,32 +266,39 @@ export class SalesSuiteTrigger implements INodeType {
 						? "activity.created"
 						: selectedEvent;
 
-				const res = await ssRequest<WebhookSubscriptionResponse>(
-					this,
-					"POST",
-					"/webhooks/subscription",
-					{
-						body: {
-							hookUrl: webhookUrl,
-							type: apiEventType,
-							filter,
+				try {
+					const res = await ssRequest<WebhookSubscriptionResponse>(
+						this,
+						"POST",
+						"/webhooks/subscription",
+						{
+							body: {
+								hookUrl: webhookUrl,
+								type: apiEventType,
+								filter,
+							},
 						},
-					},
-				);
-
-				if (!res?.id) {
-					throw new NodeOperationError(
-						this.getNode(),
-						"SalesSuite: Could not read subscriptionId from response.",
-						{ description: JSON.stringify(res || {}) },
 					);
-				}
 
-				const webhookData = this.getWorkflowStaticData(
-					"node",
-				) as TriggerStaticData;
-				webhookData.subscriptionId = res.id;
-				return true;
+					if (!res?.id) {
+						throw new NodeOperationError(
+							this.getNode(),
+							"SalesSuite: Could not read subscriptionId from response.",
+							{ description: JSON.stringify(res || {}) },
+						);
+					}
+
+					const webhookData = this.getWorkflowStaticData(
+						"node",
+					) as TriggerStaticData;
+					webhookData.subscriptionId = res.id;
+					return true;
+				} catch (e) {
+					if (e instanceof NodeOperationError) throw e;
+					throw new NodeApiError(this.getNode(), e as JsonObject, {
+						message: "Failed to create webhook subscription",
+					});
+				}
 			},
 
 			async delete(this: IHookFunctions): Promise<boolean> {
@@ -296,7 +316,11 @@ export class SalesSuiteTrigger implements INodeType {
 					);
 				} catch (e) {
 					if (!isNotFoundError(e)) {
-						throw e;
+						// Clear local state before throwing so reactivation always works
+						delete webhookData.subscriptionId;
+						throw new NodeApiError(this.getNode(), e as JsonObject, {
+							message: "Failed to delete webhook subscription",
+						});
 					}
 				}
 

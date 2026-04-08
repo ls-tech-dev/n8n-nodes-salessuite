@@ -400,16 +400,25 @@ export const dealFields: INodeProperties[] = [
 			'Contact whose deals should be returned. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	{
-		displayName: "Pipeline Name or ID",
-		name: "pipelineId",
-		type: "options",
-		typeOptions: { loadOptionsMethod: "getPipelines" },
-		default: "",
+		displayName: "Additional Options",
+		name: "additionalOptions",
+		type: "collection",
+		placeholder: "Add Option",
+		default: {},
 		displayOptions: {
 			show: { resource: ["deal"], operation: ["getDealsByContactId"] },
 		},
-		description:
-			'Optional pipeline filter. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		options: [
+			{
+				displayName: "Pipeline Name or ID",
+				name: "pipelineId",
+				type: "options",
+				typeOptions: { loadOptionsMethod: "getPipelines" },
+				default: "",
+				description:
+					'Filter deals by pipeline. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			},
+		],
 	},
 
 	// ===== CHANGE DEAL PIPELINE PHASE =====
