@@ -21,6 +21,12 @@ export const contactOperations: INodeProperties[] = [
 				action: "Find contact by email",
 			},
 			{
+				name: "Get All Contacts",
+				value: "getAllContacts",
+				description: "Fetch all contacts (auto-paginated)",
+				action: "Get all contacts",
+			},
+			{
 				name: "Get Contact by ID",
 				value: "getContactById",
 				description: "Get a contact by contact ID",

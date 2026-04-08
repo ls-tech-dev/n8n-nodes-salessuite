@@ -331,6 +331,29 @@ export async function handleContact(
 			return { searchString, contacts: data ?? [] };
 		}
 
+		case "getAllContacts": {
+			const pageSize = 100;
+			let page = 0;
+			let hasMore = true;
+			const allContacts: IDataObject[] = [];
+
+			while (hasMore) {
+				const data = await ssRequest(this, "GET", "/contact", {
+					qs: { page, pageSize },
+				});
+				const contacts = Array.isArray(data) ? (data as IDataObject[]) : [];
+				allContacts.push(...contacts);
+
+				if (contacts.length === pageSize) {
+					page++;
+				} else {
+					hasMore = false;
+				}
+			}
+
+			return allContacts;
+		}
+
 		case "listContacts": {
 			const page = this.getNodeParameter("page", i, 0) as number;
 			const pageSize = this.getNodeParameter("pageSize", i, 25) as number;
