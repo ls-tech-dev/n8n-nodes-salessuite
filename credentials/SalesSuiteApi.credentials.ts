@@ -1,5 +1,6 @@
 import type {
 	IAuthenticateGeneric,
+	ICredentialTestRequest,
 	ICredentialType,
 	Icon,
 	INodeProperties,
@@ -10,7 +11,10 @@ export class SalesSuiteApi implements ICredentialType {
 	displayName = "SalesSuite API";
 	documentationUrl =
 		"https://github.com/rjsebening/n8n-nodes-salessuite/blob/main/CREDENTIALS.md";
-	icon: Icon = "file:salessuite-icon.svg";
+	icon: Icon = {
+		light: "file:salessuite-light-icon.svg",
+		dark: "file:salessuite-dark-icon.svg",
+	};
 
 	authenticate: IAuthenticateGeneric = {
 		type: "generic",
@@ -40,10 +44,11 @@ export class SalesSuiteApi implements ICredentialType {
 		},
 	];
 
-	test = {
+	test: ICredentialTestRequest = {
 		request: {
-			method: "GET" as const,
-			url: "={{$credentials.baseUrl}}/pipelines",
+			baseURL: "={{$credentials.baseUrl}}",
+			url: "/pipelines",
+			method: "GET",
 		},
 	};
 }
