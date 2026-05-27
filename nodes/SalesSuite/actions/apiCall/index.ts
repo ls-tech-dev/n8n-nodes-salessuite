@@ -10,6 +10,12 @@ export const apiCallOperations: INodeProperties[] = [
 		displayOptions: { show: { resource: ["apiCall"] } },
 		options: [
 			{
+				name: "Get Authentication Data",
+				value: "getAuthenticationData",
+				description: "Retrieve authentication data for the current API key",
+				action: "Get authentication data",
+			},
+			{
 				name: "Make Request",
 				value: "makeRequest",
 				description: "Make a custom API call",

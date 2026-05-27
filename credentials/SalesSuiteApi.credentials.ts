@@ -47,7 +47,7 @@ export class SalesSuiteApi implements ICredentialType {
 	test: ICredentialTestRequest = {
 		request: {
 			baseURL: "={{$credentials.baseUrl}}",
-			url: "/pipelines",
+			url: "/auth",
 			method: "GET",
 		},
 	};

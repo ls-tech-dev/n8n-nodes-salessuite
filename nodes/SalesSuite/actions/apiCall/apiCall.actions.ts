@@ -13,6 +13,10 @@ export async function handleApiCall(
 	operation: string,
 ): Promise<unknown> {
 	switch (operation) {
+		case "getAuthenticationData": {
+			return await ssRequest(this, "GET", "/auth");
+		}
+
 		case "makeRequest": {
 			const method = this.getNodeParameter("httpMethod", i) as string;
 			const endpoint = this.getNodeParameter("endpoint", i) as string;
