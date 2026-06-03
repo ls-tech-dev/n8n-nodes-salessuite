@@ -176,8 +176,8 @@ export const instantProperties: INodeProperties[] = [
 		required: true,
 		options: [
 			{ name: "Trigger", value: "trigger" },
-			{ name: "Link Open", value: "link_open" },
-			{ name: "Link Copy", value: "link_copy" },
+			/*	{ name: "Link Open", value: "link_open" }, */
+			/*	{ name: "Link Copy", value: "link_copy" }, */
 		],
 		displayOptions: { show: { events: ["actionButton.executed"] } },
 		description: "The action kind that should trigger the webhook",

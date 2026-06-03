@@ -7,6 +7,11 @@ export const resourceSelector: INodeProperties = {
 	noDataExpression: true,
 	options: [
 		{
+			name: "Action Button",
+			value: "actionButton",
+			description: "Preview trigger action button payloads",
+		},
+		{
 			name: "Activity",
 			value: "activity",
 			description: "Create notes and list call or email activities",
@@ -36,6 +41,11 @@ export const resourceSelector: INodeProperties = {
 			name: "Form",
 			value: "form",
 			description: "List forms and retrieve form submissions",
+		},
+		{
+			name: "Property",
+			value: "property",
+			description: "Retrieve properties and cards from SalesSuite",
 		},
 		{
 			name: "Webhook",

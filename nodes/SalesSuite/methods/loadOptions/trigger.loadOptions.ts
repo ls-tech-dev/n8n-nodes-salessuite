@@ -121,7 +121,7 @@ export async function loadTriggerActionButtons(
 		"/action-button/trigger",
 	)) as TriggerActionButtonPayload[];
 	return (data ?? []).map((b) => ({
-		name: `${b.shortName || b.fieldName} (${b.dynamicDbTableName})`,
+		name: `${b.fieldName} (${b.dynamicDbTableName} - ${b.shortName})`,
 		value: b.propertyDefinitionId,
 	}));
 }

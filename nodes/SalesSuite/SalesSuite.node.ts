@@ -9,6 +9,10 @@ import {
 	NodeOperationError,
 } from "n8n-workflow";
 
+import {
+	actionButtonFields,
+	actionButtonOperations,
+} from "./actions/action-buttons";
 import { activityFields, activityOperations } from "./actions/activity";
 import { apiCallFields, apiCallOperations } from "./actions/apiCall";
 import { contactFields, contactOperations } from "./actions/contact";
@@ -18,6 +22,7 @@ import {
 } from "./actions/contact-person";
 import { dealFields, dealOperations } from "./actions/deal";
 import { formFields, formOperations } from "./actions/form";
+import { propertyFields, propertyOperations } from "./actions/property";
 import { resourceSelector } from "./actions/resource.selector";
 import { route } from "./actions/router";
 import { webhookFields, webhookOperations } from "./actions/webhook";
@@ -67,6 +72,10 @@ export class SalesSuite implements INodeType {
 		properties: [
 			resourceSelector,
 
+			// Action Button
+			...actionButtonOperations,
+			...actionButtonFields,
+
 			// Activity
 			...activityOperations,
 			...activityFields,
@@ -91,6 +100,10 @@ export class SalesSuite implements INodeType {
 			...formOperations,
 			...formFields,
 
+			// Property
+			...propertyOperations,
+			...propertyFields,
+
 			// Webhook
 			...webhookOperations,
 			...webhookFields,
@@ -104,6 +117,7 @@ export class SalesSuite implements INodeType {
 			...Loaders.dealLoaders,
 			...Loaders.webhookLoaders,
 			...Loaders.phoneCallLoaders,
+			...Loaders.triggerLoaders,
 		},
 		resourceMapping: {
 			getContactResourceMapperFields,
