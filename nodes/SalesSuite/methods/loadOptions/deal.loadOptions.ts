@@ -18,7 +18,7 @@ type PipelinePayload = {
 export async function getDeals(
 	this: ILoadOptionsFunctions,
 ): Promise<INodePropertyOptions[]> {
-	const data = (await ssRequest(this, "GET", "/deal", {
+	const data = (await ssRequest(this, "GET", "/v1/deal", {
 		qs: { page: 0, pageSize: 50 },
 	})) as DealPayload[];
 	if (!Array.isArray(data) || !data.length) {
@@ -45,7 +45,7 @@ export async function getPipelines(
 	const data = (await ssRequest(
 		this,
 		"GET",
-		"/pipelines",
+		"/v1/pipelines",
 	)) as PipelinePayload[];
 	return (data ?? []).map((p) => ({
 		name: p.displayName || p.id,
@@ -62,7 +62,7 @@ export async function getStagesByPipeline(
 	const data = (await ssRequest(
 		this,
 		"GET",
-		"/pipelines",
+		"/v1/pipelines",
 	)) as PipelinePayload[];
 	const pipeline = (data ?? []).find(
 		(p) => String(p.id) === String(pipelineId),

@@ -83,7 +83,9 @@ export async function getContactPersonResourceMapperFields(
 	for (const prop of properties) {
 		const key = prefixKey(prop.dynamicDbTableName, prop.propertyIdentifier);
 		if (mappedByKey.has(key)) continue;
-		addField(prop, "Other");
+		// Fall back to the table name (Contact / ContactPerson) instead of a
+		// generic "Other" group for uncarded properties.
+		addField(prop, prop.dynamicDbTableName);
 	}
 
 	return { fields: mapped };

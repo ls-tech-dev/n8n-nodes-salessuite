@@ -177,13 +177,13 @@ export class SalesSuiteTrigger implements INodeType {
 		group: ["trigger"],
 		version: 1,
 		description:
-			"Interact with the SalesSuite API (powered by agentur-systeme.de)",
+			"Interact with the SalesSuite API (powered by joergsebening.de)",
 		subtitle: '={{$parameter["events"]}}',
 		defaults: {
 			name: "SalesSuite Trigger",
 			// @ts-expect-error free-form description
 			description:
-				"Interact with the SalesSuite API (powered by agentur-systeme.de)",
+				"Interact with the SalesSuite API (powered by joergsebening.de)",
 		},
 		credentials: [{ name: "salesSuiteApi", required: true }],
 		usableAsTool: true,
@@ -227,7 +227,7 @@ export class SalesSuiteTrigger implements INodeType {
 					const remote = await ssRequest<WebhookSubscriptionResponse>(
 						this,
 						"GET",
-						`/webhooks/subscription/${encodeURIComponent(id)}`,
+						`/v1/webhooks/subscription/${encodeURIComponent(id)}`,
 					);
 
 					// If the registered URL no longer matches, force re-registration
@@ -270,7 +270,7 @@ export class SalesSuiteTrigger implements INodeType {
 					const res = await ssRequest<WebhookSubscriptionResponse>(
 						this,
 						"POST",
-						"/webhooks/subscription",
+						"/v1/webhooks/subscription",
 						{
 							body: {
 								hookUrl: webhookUrl,
@@ -312,7 +312,7 @@ export class SalesSuiteTrigger implements INodeType {
 					await ssRequest(
 						this,
 						"DELETE",
-						`/webhooks/subscription/${encodeURIComponent(id)}`,
+						`/v1/webhooks/subscription/${encodeURIComponent(id)}`,
 					);
 				} catch (e) {
 					if (!isNotFoundError(e)) {
@@ -370,7 +370,7 @@ export class SalesSuiteTrigger implements INodeType {
 					const callTypes = await ssRequest<CallTypePayload[]>(
 						this,
 						"GET",
-						"/call-types",
+						"/v1/call-types",
 					);
 
 					const match = Array.isArray(callTypes)

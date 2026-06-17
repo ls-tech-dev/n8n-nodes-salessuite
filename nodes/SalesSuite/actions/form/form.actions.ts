@@ -9,7 +9,7 @@ export async function handleForm(
 ): Promise<unknown> {
 	switch (operation) {
 		case "listForms": {
-			const data = await ssRequest(this, "GET", "/form");
+			const data = await ssRequest(this, "GET", "/v1/form");
 			return data ?? [];
 		}
 
@@ -17,9 +17,14 @@ export async function handleForm(
 			const formId = this.getNodeParameter("formId", i) as string;
 			const page = this.getNodeParameter("page", i, 0) as number;
 			const pageSize = this.getNodeParameter("pageSize", i, 20) as number;
-			const data = await ssRequest(this, "GET", `/form/${formId}/submissions`, {
-				qs: { page, pageSize },
-			});
+			const data = await ssRequest(
+				this,
+				"GET",
+				`/v1/form/${formId}/submissions`,
+				{
+					qs: { page, pageSize },
+				},
+			);
 			return data ?? [];
 		}
 

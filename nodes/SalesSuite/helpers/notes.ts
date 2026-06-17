@@ -22,7 +22,7 @@ export async function createNote(
 	const qs =
 		parentType === "deal" ? { dealId: parentId } : { contactId: parentId };
 
-	const result = await ssRequest<NoteResponse>(ctx, "POST", "/note", {
+	const result = await ssRequest<NoteResponse>(ctx, "POST", "/v1/note", {
 		qs,
 		body: noteText,
 		json: false,

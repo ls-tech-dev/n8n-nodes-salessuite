@@ -37,7 +37,7 @@ export async function handleProperty(
 			);
 			addIfSet(qs, "required", this.getNodeParameter("required", i, ""));
 
-			const data = await ssRequest(this, "GET", "/property", { qs });
+			const data = await ssRequest(this, "GET", "/v1/property", { qs });
 			return data ?? [];
 		}
 
@@ -55,7 +55,7 @@ export async function handleProperty(
 				this.getNodeParameter("isPropertyRequired", i, ""),
 			);
 
-			const data = await ssRequest(this, "GET", "/card", { qs });
+			const data = await ssRequest(this, "GET", "/v1/card", { qs });
 			return data ?? [];
 		}
 

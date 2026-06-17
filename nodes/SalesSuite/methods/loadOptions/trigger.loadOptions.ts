@@ -63,7 +63,7 @@ export async function loadPipelines(
 	const data = (await ssRequest(
 		this,
 		"GET",
-		"/pipelines",
+		"/v1/pipelines",
 	)) as PipelinePayload[];
 	return (data ?? []).map((p) => ({
 		name: p.displayName || p.id,
@@ -81,7 +81,7 @@ export async function loadStages(
 	const data = (await ssRequest(
 		this,
 		"GET",
-		"/pipelines",
+		"/v1/pipelines",
 	)) as PipelinePayload[];
 	const pipeline = (data ?? []).find(
 		(p) => String(p.id) === String(pipelineId),
@@ -97,7 +97,7 @@ export async function loadStages(
 export async function loadForms(
 	this: ILoadOptionsFunctions,
 ): Promise<INodePropertyOptions[]> {
-	const data = (await ssRequest(this, "GET", "/form")) as FormPayload[];
+	const data = (await ssRequest(this, "GET", "/v1/form")) as FormPayload[];
 	return (data ?? []).map((f) => ({
 		name: f.name || f.formId,
 		value: f.formId,
@@ -118,7 +118,7 @@ export async function loadTriggerActionButtons(
 	const data = (await ssRequest(
 		this,
 		"GET",
-		"/action-button/trigger",
+		"/v1/action-button/trigger",
 	)) as TriggerActionButtonPayload[];
 	return (data ?? []).map((b) => ({
 		name: `${b.fieldName} (${b.dynamicDbTableName} - ${b.shortName})`,
@@ -132,7 +132,7 @@ export async function loadPhoneCallActivityTypes(
 	const data = (await ssRequest(
 		this,
 		"GET",
-		"/call-types",
+		"/v1/call-types",
 	)) as CallTypePayload[];
 	return (data ?? []).map((t) => ({ name: t.name, value: t.id }));
 }

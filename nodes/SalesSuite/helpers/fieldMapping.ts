@@ -243,7 +243,7 @@ export async function loadContactFieldData(
 	ctx: ILoadOptionsFunctions | IExecuteFunctions,
 ): Promise<FieldApiResponse> {
 	return (
-		(await ssRequest<FieldApiResponse>(ctx, "GET", "/fields/contact")) ?? {
+		(await ssRequest<FieldApiResponse>(ctx, "GET", "/v1/fields/contact")) ?? {
 			properties: [],
 		}
 	);
@@ -269,7 +269,7 @@ export async function loadContactPersonFieldData(
 		(await ssRequest<FieldApiResponse>(
 			ctx,
 			"GET",
-			"/fields/contact-person",
+			"/v1/fields/contact-person",
 		)) ?? {
 			properties: [],
 		}
@@ -293,7 +293,7 @@ export async function loadDealFieldData(
 	ctx: ILoadOptionsFunctions | IExecuteFunctions,
 ): Promise<FieldApiResponse> {
 	return (
-		(await ssRequest<FieldApiResponse>(ctx, "GET", "/fields/deal")) ?? {
+		(await ssRequest<FieldApiResponse>(ctx, "GET", "/v1/fields/deal")) ?? {
 			properties: [],
 		}
 	);

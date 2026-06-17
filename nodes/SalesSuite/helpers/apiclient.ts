@@ -26,6 +26,27 @@ function hasRequestWithAuthentication(ctx: ApiContext): ctx is ApiContext & {
 	return typeof ctx.helpers?.httpRequestWithAuthentication === "function";
 }
 
+function normalizeBaseUrl(baseUrl: string): string {
+	return baseUrl
+		.trim()
+		.replace(/\/+$/, "")
+		.replace(/\/v\d+$/i, "");
+}
+
+function normalizePath(path: string): string {
+	const normalizedPath = path.trim();
+	if (!normalizedPath.startsWith("/")) {
+		throw new Error(
+			`SalesSuite API path must start with a slash, for example /v1/auth. Received: ${path}`,
+		);
+	}
+	if (!/^\/v\d+(\/|$)/i.test(normalizedPath)) {
+		return `/v1${normalizedPath}`;
+	}
+
+	return normalizedPath;
+}
+
 export async function ssRequest(
 	ctx: ApiContext,
 	method: IHttpRequestOptions["method"],
@@ -61,15 +82,14 @@ export async function ssRequest<T = unknown>(
 ): Promise<T> {
 	const credentials = await ctx.getCredentials("salesSuiteApi");
 	const apiKey = String(credentials.apiKey || "").trim();
-	const baseUrl = String(credentials.baseUrl || "")
-		.trim()
-		.replace(/\/+$/, "");
+	const baseUrl = normalizeBaseUrl(String(credentials.baseUrl || ""));
+	const requestPath = normalizePath(path);
 
 	const json = opts.json ?? typeof opts.body !== "string";
 
 	const options: IHttpRequestOptions = {
 		method,
-		url: `${baseUrl}${path}`,
+		url: `${baseUrl}${requestPath}`,
 		json,
 		headers: {
 			"x-api-key": apiKey,

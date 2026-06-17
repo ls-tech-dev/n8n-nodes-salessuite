@@ -93,7 +93,15 @@ export async function getContactResourceMapperFieldsForUpdate(
 	this: ILoadOptionsFunctions,
 ): Promise<ResourceMapperFields> {
 	const res = await getContactResourceMapperFields.call(this);
-	res.fields = res.fields.map((f) => ({
+	// In node version 2 the contact update endpoint (/v2/contact/{id}) accepts a
+	// flat, contact-only body. Contact-person fields move to the Contact Person
+	// resource, so hide them here to avoid silently dropped values.
+	const nodeVersion = this.getNode().typeVersion ?? 1;
+	let fields = res.fields;
+	if (nodeVersion >= 2) {
+		fields = fields.filter((f) => !f.id.startsWith("contactPerson."));
+	}
+	res.fields = fields.map((f) => ({
 		...f,
 		required: false,
 		canBeUsedToMatch: false,

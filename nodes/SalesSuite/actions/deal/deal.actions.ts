@@ -55,14 +55,21 @@ export async function handleDeal(
 				throw new ApplicationError("Create Deal requires a name.");
 			}
 
+			const nodeVersion = this.getNode().typeVersion ?? 1;
+			const createDealPath = nodeVersion >= 2 ? "/v2/deal" : "/v1/deal";
+			const createDealOptions =
+				nodeVersion >= 2
+					? { body: { ...dataObj, contactId, phaseId } }
+					: {
+							qs: { pipelineId, contactId, phaseId },
+							body: dataObj,
+						};
+
 			const result = await ssRequest<DealMutationResponse>(
 				this,
 				"POST",
-				"/deal",
-				{
-					qs: { pipelineId, contactId, phaseId },
-					body: dataObj,
-				},
+				createDealPath,
+				createDealOptions,
 			);
 
 			const createInitialNote = this.getNodeParameter(
@@ -122,28 +129,47 @@ export async function handleDeal(
 				throw new ApplicationError("No fields provided to update.");
 			}
 
-			const qs: IDataObject = {};
-			if (updatePipelineStage) {
-				if (!pipelineIdParam || !phaseIdParam) {
-					throw new ApplicationError(
-						"To update pipeline/phase, both pipelineId and phaseId are required.",
-					);
-				}
-				qs.pipelineId = pipelineIdParam;
-				qs.phaseId = phaseIdParam;
-			}
-
 			const appendMultiSelectValues = this.getNodeParameter(
 				"appendMultiSelectValues",
 				i,
 				false,
 			) as boolean;
-			qs.appendMultiSelectValues = appendMultiSelectValues;
 
-			const result = await ssRequest(this, "PATCH", `/deal/${dealId}`, {
-				qs,
-				body: dataObj,
-			});
+			const nodeVersion = this.getNode().typeVersion ?? 1;
+
+			let result: unknown;
+			if (nodeVersion >= 2) {
+				// v2: phase moves into the body (no pipelineId); only phaseId matters
+				if (updatePipelineStage && !phaseIdParam) {
+					throw new ApplicationError(
+						"To update the phase, phaseId is required.",
+					);
+				}
+				const body: IDataObject = { ...dataObj };
+				if (updatePipelineStage) body.phaseId = phaseIdParam;
+
+				result = await ssRequest(this, "PATCH", `/v2/deal/${dealId}`, {
+					qs: { appendMultiSelectValues },
+					body,
+				});
+			} else {
+				const qs: IDataObject = {};
+				if (updatePipelineStage) {
+					if (!pipelineIdParam || !phaseIdParam) {
+						throw new ApplicationError(
+							"To update pipeline/phase, both pipelineId and phaseId are required.",
+						);
+					}
+					qs.pipelineId = pipelineIdParam;
+					qs.phaseId = phaseIdParam;
+				}
+				qs.appendMultiSelectValues = appendMultiSelectValues;
+
+				result = await ssRequest(this, "PATCH", `/v1/deal/${dealId}`, {
+					qs,
+					body: dataObj,
+				});
+			}
 
 			const createInitialNote = this.getNodeParameter(
 				"createInitialNote",
@@ -177,7 +203,11 @@ export async function handleDeal(
 				throw new ApplicationError("dealId is required.");
 			}
 
-			const data = await ssRequest<IDataObject>(this, "GET", `/deal/${dealId}`);
+			const data = await ssRequest<IDataObject>(
+				this,
+				"GET",
+				`/v1/deal/${dealId}`,
+			);
 
 			return {
 				dealId,
@@ -209,7 +239,7 @@ export async function handleDeal(
 				const data = await ssRequest(
 					this,
 					"GET",
-					`/deal/by-contact/${contactId}`,
+					`/v1/deal/by-contact/${contactId}`,
 					{ qs: { page, pageSize, pipelineId } },
 				);
 
@@ -250,7 +280,7 @@ export async function handleDeal(
 				const data = await ssRequest(
 					this,
 					"GET",
-					`/deal/by-contact/${contactId}`,
+					`/v1/deal/by-contact/${contactId}`,
 					{ qs: { page, pageSize, pipelineId } },
 				);
 
@@ -290,7 +320,7 @@ export async function handleDeal(
 				throw new ApplicationError("Email is required.");
 			}
 
-			const data = await ssRequest(this, "GET", "/deal/by-email", {
+			const data = await ssRequest(this, "GET", "/v1/deal/by-email", {
 				qs: { email },
 			});
 
@@ -334,7 +364,7 @@ export async function handleDeal(
 			const pipelineId =
 				(this.getNodeParameter("pipelineId", i, "") as string) || undefined;
 
-			const data = await ssRequest(this, "GET", "/deal", {
+			const data = await ssRequest(this, "GET", "/v1/deal", {
 				qs: { page, pageSize, pipelineId },
 			});
 			return {
@@ -346,7 +376,7 @@ export async function handleDeal(
 		}
 
 		case "getPipelines": {
-			const data = await ssRequest(this, "GET", "/pipelines");
+			const data = await ssRequest(this, "GET", "/v1/pipelines");
 			return data ?? [];
 		}
 
@@ -360,7 +390,7 @@ export async function handleDeal(
 			const allDeals: IDataObject[] = [];
 
 			while (hasMore) {
-				const deals = ((await ssRequest(this, "GET", "/deal", {
+				const deals = ((await ssRequest(this, "GET", "/v1/deal", {
 					qs: { page, pageSize, pipelineId },
 				})) ?? []) as IDataObject[];
 
@@ -382,7 +412,7 @@ export async function handleDeal(
 			const pipelineId = this.getNodeParameter("pipelineId", i) as string;
 			const phaseId = this.getNodeParameter("phaseId", i) as string;
 
-			const result = await ssRequest(this, "PATCH", `/deal/${dealId}`, {
+			const result = await ssRequest(this, "PATCH", `/v1/deal/${dealId}`, {
 				qs: { pipelineId, phaseId },
 				body: {},
 			});

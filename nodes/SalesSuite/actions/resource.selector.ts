@@ -48,6 +48,11 @@ export const resourceSelector: INodeProperties = {
 			description: "Retrieve properties and cards from SalesSuite",
 		},
 		{
+			name: "User",
+			value: "user",
+			description: "Retrieve users",
+		},
+		{
 			name: "Webhook",
 			value: "webhook",
 			description: "Manage webhook subscriptions in SalesSuite",

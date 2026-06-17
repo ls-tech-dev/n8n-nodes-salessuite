@@ -21,7 +21,7 @@ export async function handleActionButton(
 			const data = await ssRequest(
 				this,
 				"GET",
-				"/action-button/trigger/preview",
+				"/v1/action-button/trigger/preview",
 				{
 					qs: { propertyDefinitionId, limit },
 				},

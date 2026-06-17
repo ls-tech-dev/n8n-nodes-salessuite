@@ -30,8 +30,8 @@ export class SalesSuiteApi implements ICredentialType {
 			displayName: "API Base URL",
 			name: "baseUrl",
 			type: "string",
-			default: "https://api.salessuite.com/api/v1",
-			placeholder: "https://api.salessuite.com/api/v1",
+			default: "https://api.salessuite.com/api",
+			placeholder: "https://api.salessuite.com/api",
 			description: "Base URL of the SalesSuite Public API",
 		},
 		{
@@ -46,8 +46,9 @@ export class SalesSuiteApi implements ICredentialType {
 
 	test: ICredentialTestRequest = {
 		request: {
-			baseURL: "={{$credentials.baseUrl}}",
-			url: "/auth",
+			baseURL:
+				"={{String($credentials.baseUrl).replace(/\\/+$/, '').replace(/\\/v\\d+$/i, '')}}",
+			url: "/v1/auth",
 			method: "GET",
 		},
 	};

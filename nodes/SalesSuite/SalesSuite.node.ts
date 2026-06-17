@@ -25,6 +25,7 @@ import { formFields, formOperations } from "./actions/form";
 import { propertyFields, propertyOperations } from "./actions/property";
 import { resourceSelector } from "./actions/resource.selector";
 import { route } from "./actions/router";
+import { userFields, userOperations } from "./actions/user";
 import { webhookFields, webhookOperations } from "./actions/webhook";
 import * as Loaders from "./methods/loadOptions";
 import {
@@ -50,15 +51,15 @@ export class SalesSuite implements INodeType {
 			dark: "file:salessuite-dark-icon.svg",
 		},
 		group: ["transform"],
-		version: 1,
+		version: [1, 2],
 		description:
-			"Interact with the SalesSuite API (powered by agentur-systeme.de)",
+			"Interact with the SalesSuite API (powered by joergsebening.de)",
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
 		defaults: {
 			name: "SalesSuite",
 			// @ts-expect-error free-form description
 			description:
-				"Interact with the SalesSuite API (powered by agentur-systeme.de)",
+				"Interact with the SalesSuite API (powered by joergsebening.de)",
 		},
 		inputs: [NodeConnectionTypes.Main],
 		outputs: [NodeConnectionTypes.Main],
@@ -104,6 +105,10 @@ export class SalesSuite implements INodeType {
 			...propertyOperations,
 			...propertyFields,
 
+			// User
+			...userOperations,
+			...userFields,
+
 			// Webhook
 			...webhookOperations,
 			...webhookFields,
@@ -118,6 +123,7 @@ export class SalesSuite implements INodeType {
 			...Loaders.webhookLoaders,
 			...Loaders.phoneCallLoaders,
 			...Loaders.triggerLoaders,
+			...Loaders.userLoaders,
 		},
 		resourceMapping: {
 			getContactResourceMapperFields,

@@ -52,7 +52,7 @@ export async function getPipelines(
 	const data = (await ssRequest(
 		this,
 		"GET",
-		"/pipelines",
+		"/v1/pipelines",
 	)) as PipelinePayload[];
 	return (data ?? []).map((p) => ({
 		name: p.displayName || p.id,
@@ -69,7 +69,7 @@ export async function getStagesByPipeline(
 	const data = (await ssRequest(
 		this,
 		"GET",
-		"/pipelines",
+		"/v1/pipelines",
 	)) as PipelinePayload[];
 	const pipeline = (data ?? []).find(
 		(p: PipelinePayload) => String(p.id) === String(pipelineId),
@@ -97,11 +97,11 @@ export async function getContacts(
 	let data: ContactPayload[] = [];
 
 	if (search.trim()) {
-		data = (await ssRequest(this, "GET", "/contact/search", {
+		data = (await ssRequest(this, "GET", "/v1/contact/search", {
 			qs: { query: search.trim() },
 		})) as ContactPayload[];
 	} else {
-		data = (await ssRequest(this, "GET", "/contact", {
+		data = (await ssRequest(this, "GET", "/v1/contact", {
 			qs: { page: 0, pageSize: 25 },
 		})) as ContactPayload[];
 	}
@@ -123,7 +123,7 @@ export async function getContacts(
 export async function getDeals(
 	this: ILoadOptionsFunctions,
 ): Promise<INodePropertyOptions[]> {
-	const data = (await ssRequest(this, "GET", "/deal", {
+	const data = (await ssRequest(this, "GET", "/v1/deal", {
 		qs: { page: 0, pageSize: 25 },
 	})) as DealPayload[];
 	if (!Array.isArray(data) || !data.length) {

@@ -36,7 +36,7 @@ export async function handleActivity(
 				throw new ApplicationError("callTypeId is required.");
 			}
 
-			const data = await ssRequest(this, "GET", "/call-types");
+			const data = await ssRequest(this, "GET", "/v1/call-types");
 			const list = Array.isArray(data) ? data : [];
 
 			if (callTypeId === "any") {
@@ -53,13 +53,13 @@ export async function handleActivity(
 		}
 
 		case "listCallTypes": {
-			const data = await ssRequest(this, "GET", "/call-types");
+			const data = await ssRequest(this, "GET", "/v1/call-types");
 			return data ?? [];
 		}
 
 		case "listEmailActivities": {
 			const contactId = this.getNodeParameter("contactId", i) as string;
-			const data = await ssRequest(this, "POST", "/get-mail-activities", {
+			const data = await ssRequest(this, "POST", "/v1/get-mail-activities", {
 				body: { contactId },
 			});
 			return { scope: "contact", parentId: contactId, activities: data ?? [] };
@@ -91,7 +91,7 @@ export async function handleActivity(
 				}
 			}
 
-			const data = await ssRequest(this, "POST", "/get-call-activities", {
+			const data = await ssRequest(this, "POST", "/v1/get-call-activities", {
 				body,
 			});
 			return { scope: callScope, parentId, activities: data ?? [] };

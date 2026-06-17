@@ -206,6 +206,40 @@ export const contactFields: INodeProperties[] = [
 		},
 	},
 	{
+		displayName: "Match Strategy",
+		name: "upsertMatchStrategy",
+		type: "options",
+		default: "errorOnMultiple",
+		description:
+			"How to choose the contact to update when the email matches more than one contact",
+		options: [
+			{
+				name: "Error if Ambiguous",
+				value: "errorOnMultiple",
+				description:
+					"Throw an error if the email matches more than one contact",
+			},
+			{
+				name: "Prefer Main Contact Person",
+				value: "preferMainContactPerson",
+				description:
+					"Only consider contacts whose main contact person uses the email; error if still ambiguous",
+			},
+			{
+				name: "Use First Match",
+				value: "firstMatch",
+				description: "Update the first matched contact (legacy behavior)",
+			},
+		],
+		displayOptions: {
+			show: {
+				resource: ["contact"],
+				operation: ["upsertContact"],
+				"@version": [2],
+			},
+		},
+	},
+	{
 		displayName: "Fields (for Create or Update)",
 		name: "fields",
 		type: "resourceMapper",
@@ -240,6 +274,35 @@ export const contactFields: INodeProperties[] = [
 		},
 	},
 	{
+		displayName:
+			"Returns every contact that uses this email — whether on the main or an additional contact person. Multiple contacts may be returned.",
+		name: "getByEmailV2Info",
+		type: "notice",
+		default: "",
+		displayOptions: {
+			show: {
+				resource: ["contact"],
+				operation: ["getByEmail"],
+				"@version": [2],
+			},
+		},
+	},
+	{
+		displayName: "Only Main Contact Person Matches?",
+		name: "onlyMainContactPerson",
+		type: "boolean",
+		default: false,
+		description:
+			"Whether to only return contacts where the email belongs to the main contact person",
+		displayOptions: {
+			show: {
+				resource: ["contact"],
+				operation: ["getByEmail"],
+				"@version": [2],
+			},
+		},
+	},
+	{
 		displayName: "Fail If Not Found",
 		name: "failIfNotFound",
 		type: "boolean",
@@ -256,7 +319,99 @@ export const contactFields: INodeProperties[] = [
 		type: "string",
 		default: "",
 		displayOptions: {
-			show: { resource: ["contact"], operation: ["searchContacts"] },
+			show: {
+				resource: ["contact"],
+				operation: ["searchContacts"],
+				"@version": [1],
+			},
+		},
+	},
+	// ===== SEARCH CONTACTS (v2) =====
+	{
+		displayName:
+			"Search uses a saved filter (Filter ID) or inline filter groups. Leave both empty to return all contacts.",
+		name: "searchV2Info",
+		type: "notice",
+		default: "",
+		displayOptions: {
+			show: {
+				resource: ["contact"],
+				operation: ["searchContacts"],
+				"@version": [2],
+			},
+		},
+	},
+	{
+		displayName: "Filter ID",
+		name: "filterId",
+		type: "string",
+		default: "",
+		description:
+			"ID of a saved contact filter. Provide either Filter ID or Filter Groups.",
+		displayOptions: {
+			show: {
+				resource: ["contact"],
+				operation: ["searchContacts"],
+				"@version": [2],
+			},
+		},
+	},
+	{
+		displayName: "Filter Groups (JSON)",
+		name: "orFilterGroups",
+		type: "json",
+		default: "[]",
+		description:
+			'Inline OR filter groups. Array of objects shaped like { "andFilterItems": [{ "propertyIdentification": "contact_companyName", "condition": { "type": "string", "check": "contains", "value": "GmbH" } }] }.',
+		displayOptions: {
+			show: {
+				resource: ["contact"],
+				operation: ["searchContacts"],
+				"@version": [2],
+			},
+		},
+	},
+	{
+		displayName: "Order By (JSON)",
+		name: "orderBy",
+		type: "json",
+		default: "[]",
+		description:
+			'Array of sort items shaped like { "propertyIdentification": "contact_createdAt", "sortOrder": "desc", "nulls": "last" }',
+		displayOptions: {
+			show: {
+				resource: ["contact"],
+				operation: ["searchContacts"],
+				"@version": [2],
+			},
+		},
+	},
+	{
+		displayName: "Page",
+		name: "page",
+		type: "number",
+		default: 0,
+		displayOptions: {
+			show: {
+				resource: ["contact"],
+				operation: ["searchContacts"],
+				"@version": [2],
+			},
+		},
+	},
+	{
+		displayName: "Page Size",
+		name: "pageSize",
+		type: "number",
+		default: 25,
+		typeOptions: { minValue: 1 },
+		description: "Max number of results to return",
+		displayOptions: {
+			show: {
+				resource: ["contact"],
+				operation: ["searchContacts"],
+				"@version": [2],
+			},
 		},
 	},
 	{

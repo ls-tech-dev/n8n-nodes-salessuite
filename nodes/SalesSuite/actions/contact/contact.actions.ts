@@ -100,6 +100,56 @@ function pickEmail(payload: {
 	return String(email ?? "").trim();
 }
 
+// Determines where the matched email lives on a contact lookup entry: on the
+// main contact person, or on one of the additional contact persons (with index).
+function resolveEmailSource(
+	entry: ContactLookupEntry,
+	email: string,
+): IDataObject | null {
+	const wanted = email.toLowerCase();
+
+	if (entry.mainContactPerson?.email?.toLowerCase() === wanted) {
+		return { type: "mainContactPerson", id: entry.mainContactPerson.id };
+	}
+
+	if (Array.isArray(entry.additionalContactPersons)) {
+		const index = entry.additionalContactPersons.findIndex(
+			(person) => person?.email?.toLowerCase() === wanted,
+		);
+		if (index !== -1) {
+			return {
+				type: "additionalContactPerson",
+				id: entry.additionalContactPersons[index].id,
+				index,
+			};
+		}
+	}
+
+	return null;
+}
+
+// Returns true if the contact's MAIN contact person uses the given email.
+function isMainContactPersonEmail(
+	entry: ContactLookupEntry,
+	email: string,
+): boolean {
+	return entry.mainContactPerson?.email?.toLowerCase() === email.toLowerCase();
+}
+
+// Accepts either an already-parsed array/object (n8n "json" field) or a JSON
+// string and returns the parsed value. Throws a readable error on bad JSON.
+function parseJsonParam(raw: unknown, fieldName: string): unknown {
+	if (raw === undefined || raw === null || raw === "") return undefined;
+	if (typeof raw !== "string") return raw;
+	const trimmed = raw.trim();
+	if (!trimmed) return undefined;
+	try {
+		return JSON.parse(trimmed);
+	} catch {
+		throw new ApplicationError(`${fieldName} must be valid JSON.`);
+	}
+}
+
 export async function handleContact(
 	this: IExecuteFunctions,
 	i: number,
@@ -120,7 +170,7 @@ export async function handleContact(
 			const result = await ssRequest<ContactMutationResponse>(
 				this,
 				"POST",
-				"/contact/create",
+				"/v1/contact/create",
 				{
 					body: payload,
 				},
@@ -151,27 +201,47 @@ export async function handleContact(
 				delete payload.contactPerson.email;
 			}
 
-			const hasFields =
-				Object.keys(payload.contact).length > 0 ||
-				Object.keys(payload.contactPerson).length > 0;
-			if (!hasFields) {
-				throw new ApplicationError("No fields provided to update.");
-			}
-
 			const appendMultiSelectValues = this.getNodeParameter(
 				"appendMultiSelectValues",
 				i,
 				false,
 			) as boolean;
 
-			const result = await ssRequest(this, "PATCH", `/contact/${contactId}`, {
-				qs: { appendMultiSelectValues },
-				body: payload,
-			});
+			const nodeVersion = this.getNode().typeVersion ?? 1;
+
+			let result: unknown;
+			let inputData: IDataObject = payload as unknown as IDataObject;
+			if (nodeVersion >= 2) {
+				// v2: flat, contact-only body. Contact-person data is edited via the
+				// dedicated Contact Person resource and is not accepted here.
+				const body: IDataObject = { ...payload.contact };
+				delete body.email; // v2 contact schema has no email field
+				if (Object.keys(body).length === 0) {
+					throw new ApplicationError(
+						"No contact-level fields to update. Edit contact persons via the Contact Person resource.",
+					);
+				}
+				inputData = body;
+				result = await ssRequest(this, "PATCH", `/v2/contact/${contactId}`, {
+					qs: { appendMultiSelectValues },
+					body,
+				});
+			} else {
+				const hasFields =
+					Object.keys(payload.contact).length > 0 ||
+					Object.keys(payload.contactPerson).length > 0;
+				if (!hasFields) {
+					throw new ApplicationError("No fields provided to update.");
+				}
+				result = await ssRequest(this, "PATCH", `/v1/contact/${contactId}`, {
+					qs: { appendMultiSelectValues },
+					body: payload,
+				});
+			}
 
 			const initialNoteId = await maybeCreateNote(this, i, contactId);
 
-			return { ...(result ?? {}), inputData: payload, initialNoteId };
+			return { ...(result ?? {}), inputData, initialNoteId };
 		}
 
 		case "upsertContact": {
@@ -188,20 +258,65 @@ export async function handleContact(
 			const lookup = await ssRequest<ContactLookupEntry | ContactLookupEntry[]>(
 				this,
 				"GET",
-				"/contact/by-email",
+				"/v1/contact/by-email",
 				{
 					qs: { email },
 				},
 			);
 
-			const existing: ContactLookupEntry | null = Array.isArray(lookup)
-				? (lookup[0] ?? null)
-				: lookup && typeof lookup === "object" && !Array.isArray(lookup)
-					? Object.keys(lookup).length > 0
-						? lookup
-						: null
-					: null;
-			const contactId = existing?.contact?.id as string | undefined;
+			const nodeVersion = this.getNode().typeVersion ?? 1;
+
+			let contactId: string | undefined;
+			if (nodeVersion >= 2) {
+				// v2: the email may match several contacts (main or additional
+				// contact persons). Resolve the update target via Match Strategy.
+				let entries: ContactLookupEntry[] = [];
+				if (Array.isArray(lookup)) {
+					entries = lookup;
+				} else if (lookup && Object.keys(lookup).length > 0) {
+					entries = [lookup];
+				}
+
+				const matchStrategy = this.getNodeParameter(
+					"upsertMatchStrategy",
+					i,
+					"errorOnMultiple",
+				) as string;
+
+				let target: ContactLookupEntry | undefined;
+				if (matchStrategy === "preferMainContactPerson") {
+					const mains = entries.filter((entry) =>
+						isMainContactPersonEmail(entry, email),
+					);
+					if (mains.length > 1) {
+						throw new ApplicationError(
+							`Email "${email}" is the main contact person on ${mains.length} contacts — ambiguous. Update by contact ID instead.`,
+						);
+					}
+					target = mains[0]; // undefined → fall through to create
+				} else if (matchStrategy === "firstMatch") {
+					target = entries[0];
+				} else {
+					// errorOnMultiple (default)
+					if (entries.length > 1) {
+						throw new ApplicationError(
+							`Email "${email}" matches ${entries.length} contacts — ambiguous. Use a different Match Strategy or update by contact ID.`,
+						);
+					}
+					target = entries[0];
+				}
+
+				contactId = target?.contact?.id as string | undefined;
+			} else {
+				const existing: ContactLookupEntry | null = Array.isArray(lookup)
+					? (lookup[0] ?? null)
+					: lookup && typeof lookup === "object" && !Array.isArray(lookup)
+						? Object.keys(lookup).length > 0
+							? lookup
+							: null
+						: null;
+				contactId = existing?.contact?.id as string | undefined;
+			}
 
 			if (contactId) {
 				const appendMultiSelectValues = this.getNodeParameter(
@@ -209,10 +324,15 @@ export async function handleContact(
 					i,
 					false,
 				) as boolean;
-				const result = await ssRequest(this, "PATCH", `/contact/${contactId}`, {
-					qs: { appendMultiSelectValues },
-					body: payload,
-				});
+				const result = await ssRequest(
+					this,
+					"PATCH",
+					`/v1/contact/${contactId}`,
+					{
+						qs: { appendMultiSelectValues },
+						body: payload,
+					},
+				);
 				return {
 					mode: "found-and-updated",
 					...(result ?? {}),
@@ -220,7 +340,7 @@ export async function handleContact(
 				};
 			}
 
-			const created = await ssRequest(this, "POST", "/contact/create", {
+			const created = await ssRequest(this, "POST", "/v1/contact/create", {
 				body: payload,
 			});
 
@@ -242,12 +362,46 @@ export async function handleContact(
 			const data = await ssRequest<ContactLookupEntry[]>(
 				this,
 				"GET",
-				"/contact/by-email",
+				"/v1/contact/by-email",
 				{
 					qs: { email },
 				},
 			);
 
+			const nodeVersion = this.getNode().typeVersion ?? 1;
+
+			if (nodeVersion >= 2) {
+				// v2: the endpoint returns ALL contacts whose main OR additional
+				// contact person uses this email — emit one item per contact.
+				let entries = Array.isArray(data) ? data : [];
+
+				const onlyMainContactPerson = this.getNodeParameter(
+					"onlyMainContactPerson",
+					i,
+					false,
+				) as boolean;
+				if (onlyMainContactPerson) {
+					entries = entries.filter((entry) =>
+						isMainContactPersonEmail(entry, email),
+					);
+				}
+
+				if (entries.length === 0) {
+					if (failIfNotFound) {
+						throw new ApplicationError(`No contact found for email: ${email}`);
+					}
+					return [{ email, found: false }];
+				}
+
+				return entries.map((entry) => ({
+					email,
+					found: true,
+					emailSource: resolveEmailSource(entry, email),
+					...entry,
+				}));
+			}
+
+			// v1: legacy single-item behaviour (first match only).
 			const entry = Array.isArray(data) && data.length > 0 ? data[0] : null;
 
 			if (!entry) {
@@ -257,36 +411,11 @@ export async function handleContact(
 				return [{ email, found: false }];
 			}
 
-			let emailSource: IDataObject | null = null;
-
-			if (
-				entry.mainContactPerson?.email?.toLowerCase() === email.toLowerCase()
-			) {
-				emailSource = {
-					type: "mainContactPerson",
-					id: entry.mainContactPerson.id,
-				};
-			}
-
-			if (!emailSource && Array.isArray(entry.additionalContactPersons)) {
-				const index = entry.additionalContactPersons.findIndex(
-					(person) => person?.email?.toLowerCase() === email.toLowerCase(),
-				);
-
-				if (index !== -1) {
-					emailSource = {
-						type: "additionalContactPerson",
-						id: entry.additionalContactPersons[index].id,
-						index,
-					};
-				}
-			}
-
 			return [
 				{
 					email,
 					found: true,
-					emailSource,
+					emailSource: resolveEmailSource(entry, email),
 					...entry,
 				},
 			];
@@ -304,7 +433,7 @@ export async function handleContact(
 			const data = await ssRequest<IDataObject>(
 				this,
 				"GET",
-				`/contact/${contactId}`,
+				`/v1/contact/${contactId}`,
 			);
 
 			return [
@@ -317,6 +446,40 @@ export async function handleContact(
 		}
 
 		case "searchContacts": {
+			const nodeVersion = this.getNode().typeVersion ?? 1;
+
+			if (nodeVersion >= 2) {
+				const filterId = (
+					this.getNodeParameter("filterId", i, "") as string
+				).trim();
+				const page = this.getNodeParameter("page", i, 0) as number;
+				const pageSize = this.getNodeParameter("pageSize", i, 25) as number;
+				const orFilterGroups = parseJsonParam(
+					this.getNodeParameter("orFilterGroups", i, "[]"),
+					"orFilterGroups",
+				);
+				const orderBy = parseJsonParam(
+					this.getNodeParameter("orderBy", i, "[]"),
+					"orderBy",
+				);
+
+				const body: IDataObject = { page, pageSize };
+				if (filterId) body.filterId = filterId;
+				if (Array.isArray(orFilterGroups) && orFilterGroups.length)
+					body.orFilterGroups = orFilterGroups;
+				if (Array.isArray(orderBy) && orderBy.length) body.orderBy = orderBy;
+
+				const data = await ssRequest(this, "POST", "/v2/contact/search", {
+					body,
+				});
+				return {
+					page,
+					pageSize,
+					filterId: filterId || null,
+					contacts: data ?? [],
+				};
+			}
+
 			const searchString = this.getNodeParameter(
 				"searchString",
 				i,
@@ -325,7 +488,7 @@ export async function handleContact(
 			if (!searchString.trim()) {
 				throw new ApplicationError("Search requires a query string.");
 			}
-			const data = await ssRequest(this, "GET", "/contact/search", {
+			const data = await ssRequest(this, "GET", "/v1/contact/search", {
 				qs: { query: searchString.trim() },
 			});
 			return { searchString, contacts: data ?? [] };
@@ -338,7 +501,7 @@ export async function handleContact(
 			const allContacts: IDataObject[] = [];
 
 			while (hasMore) {
-				const data = await ssRequest(this, "GET", "/contact", {
+				const data = await ssRequest(this, "GET", "/v1/contact", {
 					qs: { page, pageSize },
 				});
 				const contacts = Array.isArray(data) ? (data as IDataObject[]) : [];
@@ -357,7 +520,7 @@ export async function handleContact(
 		case "listContacts": {
 			const page = this.getNodeParameter("page", i, 0) as number;
 			const pageSize = this.getNodeParameter("pageSize", i, 25) as number;
-			const data = await ssRequest(this, "GET", "/contact", {
+			const data = await ssRequest(this, "GET", "/v1/contact", {
 				qs: { page, pageSize },
 			});
 			return { page, pageSize, contacts: data ?? [] };

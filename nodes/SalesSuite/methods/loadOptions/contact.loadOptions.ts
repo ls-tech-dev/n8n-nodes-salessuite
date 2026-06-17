@@ -46,11 +46,11 @@ export async function getContacts(
 	let data: ContactPayload[] = [];
 
 	if (search.trim()) {
-		data = (await ssRequest(this, "GET", "/contact/search", {
+		data = (await ssRequest(this, "GET", "/v1/contact/search", {
 			qs: { query: search.trim() },
 		})) as ContactPayload[];
 	} else {
-		data = (await ssRequest(this, "GET", "/contact", {
+		data = (await ssRequest(this, "GET", "/v1/contact", {
 			qs: { page: 0, pageSize: 25 },
 		})) as ContactPayload[];
 	}

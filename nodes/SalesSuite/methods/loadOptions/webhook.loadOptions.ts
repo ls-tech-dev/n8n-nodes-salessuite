@@ -37,7 +37,7 @@ export async function getWebhooksAsOptions(this: ILoadOptionsFunctions) {
 	const list = (await ssRequest(
 		this,
 		"GET",
-		"/webhooks/subscription",
+		"/v1/webhooks/subscription",
 	)) as SubscriptionPayload[];
 	if (!Array.isArray(list) || !list.length)
 		return [{ name: "No Webhooks Found", value: "" }];
@@ -48,7 +48,7 @@ export async function getWebhooksAsOptions(this: ILoadOptionsFunctions) {
 }
 
 export async function getFormsAsOptions(this: ILoadOptionsFunctions) {
-	const list = (await ssRequest(this, "GET", "/form")) as FormPayload[];
+	const list = (await ssRequest(this, "GET", "/v1/form")) as FormPayload[];
 	return list.length
 		? list.map((f) => ({ name: f.name || f.formId, value: f.formId }))
 		: [{ name: "No Forms Found", value: "" }];

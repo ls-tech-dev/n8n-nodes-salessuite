@@ -90,7 +90,7 @@ export async function handleWebhook(
 ): Promise<unknown> {
 	switch (operation) {
 		case "listWebhooks": {
-			const data = await ssRequest(this, "GET", "/webhooks/subscription");
+			const data = await ssRequest(this, "GET", "/v1/webhooks/subscription");
 			return { webhooks: data ?? [] };
 		}
 
@@ -102,7 +102,7 @@ export async function handleWebhook(
 			const data = await ssRequest(
 				this,
 				"GET",
-				`/webhooks/subscription/${encodeURIComponent(id)}`,
+				`/v1/webhooks/subscription/${encodeURIComponent(id)}`,
 			);
 			return data ?? {};
 		}
@@ -112,7 +112,7 @@ export async function handleWebhook(
 			const type = this.getNodeParameter("triggers", i) as string;
 			const filter = buildFilter(this, i, type);
 
-			const data = await ssRequest(this, "POST", "/webhooks/subscription", {
+			const data = await ssRequest(this, "POST", "/v1/webhooks/subscription", {
 				body: { hookUrl, type, filter },
 			});
 			return data ?? {};
@@ -126,7 +126,7 @@ export async function handleWebhook(
 			const existing = await ssRequest<WebhookSubscriptionResponse>(
 				this,
 				"GET",
-				`/webhooks/subscription/${id}`,
+				`/v1/webhooks/subscription/${id}`,
 			);
 
 			const nextType = type || existing?.type;
@@ -141,7 +141,7 @@ export async function handleWebhook(
 			const data = await ssRequest(
 				this,
 				"PUT",
-				`/webhooks/subscription/${id}`,
+				`/v1/webhooks/subscription/${id}`,
 				{
 					body: {
 						hookUrl: url || existing?.hookUrl,
@@ -160,7 +160,7 @@ export async function handleWebhook(
 			const data = await ssRequest(
 				this,
 				"DELETE",
-				`/webhooks/subscription/${id}`,
+				`/v1/webhooks/subscription/${id}`,
 			);
 			return { deleted: data ?? null };
 		}

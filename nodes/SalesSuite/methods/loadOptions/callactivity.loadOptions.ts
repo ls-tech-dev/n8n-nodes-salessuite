@@ -116,7 +116,7 @@ export async function loadPhoneCallActivityTypes(
 	const list = (await ssRequest(
 		this,
 		"GET",
-		"/call-types",
+		"/v1/call-types",
 	)) as CallTypePayload[];
 	return [
 		{ name: "Any Call Type", value: "any" },
@@ -149,7 +149,7 @@ export async function loadCallResultTypes(
 	const list = (await ssRequest(
 		this,
 		"GET",
-		"/call-types",
+		"/v1/call-types",
 	)) as CallTypePayload[];
 	const selectedCallTypeId =
 		callTypeId && callTypeId !== "any" ? callTypeId : undefined;

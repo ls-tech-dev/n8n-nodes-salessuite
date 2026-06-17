@@ -53,8 +53,9 @@ export const apiCallFields: INodeProperties[] = [
 		},
 		default: "",
 		required: true,
-		placeholder: "/contact",
-		description: "API endpoint path (without base URL)",
+		placeholder: "/v1/contact",
+		description:
+			"API endpoint path including version, for example /v1/contact or /v2/deal",
 	},
 	{
 		displayName: "Request Body",

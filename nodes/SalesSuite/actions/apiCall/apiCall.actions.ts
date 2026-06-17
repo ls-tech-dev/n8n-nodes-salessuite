@@ -14,7 +14,7 @@ export async function handleApiCall(
 ): Promise<unknown> {
 	switch (operation) {
 		case "getAuthenticationData": {
-			return await ssRequest(this, "GET", "/auth");
+			return await ssRequest(this, "GET", "/v1/auth");
 		}
 
 		case "makeRequest": {

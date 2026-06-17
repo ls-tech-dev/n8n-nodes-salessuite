@@ -26,7 +26,7 @@ export async function listWebhooks(
 		const list = await ssRequest<WebhookListEntry[]>(
 			ctx,
 			"GET",
-			"/webhooks/subscription",
+			"/v1/webhooks/subscription",
 		);
 		return Array.isArray(list)
 			? list.map((w) => ({ id: w.id, url: w.hookUrl, type: w.type }))
@@ -70,7 +70,7 @@ export async function deleteWebhookByIdWithRetry(
 	const retries = opts?.retries ?? 3;
 	for (let attempt = 0; attempt <= retries; attempt++) {
 		try {
-			await ssRequest(ctx, "DELETE", `/webhooks/subscription/${id}`);
+			await ssRequest(ctx, "DELETE", `/v1/webhooks/subscription/${id}`);
 			return true;
 		} catch (e) {
 			const msg = (e as ApiErrorLike).message || "unknown";

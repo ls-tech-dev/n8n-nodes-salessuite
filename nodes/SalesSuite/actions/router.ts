@@ -8,6 +8,7 @@ import { handleContactPerson } from "./contact-person/contactPerson.actions";
 import { handleDeal } from "./deal/deal.actions";
 import { handleForm } from "./form/form.actions";
 import { handleProperty } from "./property/property.actions";
+import { handleUser } from "./user/user.actions";
 import { handleWebhook } from "./webhook/webhook.actions";
 
 export async function route(
@@ -40,6 +41,9 @@ export async function route(
 
 		case "property":
 			return await handleProperty.call(this, i, operation);
+
+		case "user":
+			return await handleUser.call(this, i, operation);
 
 		case "webhook":
 			return await handleWebhook.call(this, i, operation);
