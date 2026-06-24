@@ -166,7 +166,26 @@ export const dealFields: INodeProperties[] = [
 			},
 		},
 		default: "",
-		description: "Plain text note",
+		description:
+			"Note content as plain text or HTML, depending on the selected format",
+	},
+	{
+		displayName: "Initial Note Format",
+		name: "initialNoteFormat",
+		type: "options",
+		options: [
+			{ name: "Plain Text", value: "text/plain" },
+			{ name: "HTML", value: "text/html" },
+		],
+		default: "text/plain",
+		displayOptions: {
+			show: {
+				resource: ["deal"],
+				operation: ["createDeal"],
+				createInitialNote: [true],
+			},
+		},
+		description: "Whether the initial note text is plain text or HTML",
 	},
 	// ===== UPDATE DEAL =====
 	{
@@ -324,7 +343,26 @@ export const dealFields: INodeProperties[] = [
 			},
 		},
 		default: "",
-		description: "Plain text note",
+		description:
+			"Note content as plain text or HTML, depending on the selected format",
+	},
+	{
+		displayName: "Initial Note Format",
+		name: "initialNoteFormat",
+		type: "options",
+		options: [
+			{ name: "Plain Text", value: "text/plain" },
+			{ name: "HTML", value: "text/html" },
+		],
+		default: "text/plain",
+		displayOptions: {
+			show: {
+				resource: ["deal"],
+				operation: ["updateDeal"],
+				createInitialNote: [true],
+			},
+		},
+		description: "Whether the initial note text is plain text or HTML",
 	},
 	// ===== LIST DEALS =====
 	{

@@ -3,6 +3,13 @@ import { ApplicationError, IDataObject, IExecuteFunctions } from "n8n-workflow";
 import { ssRequest } from "../../helpers/apiclient";
 import { createNote } from "../../helpers/notes";
 
+/**
+ * Backward-compatibility shim for the legacy "Activity" resource. The resource is
+ * no longer offered in the resource selector (its operations moved to the dedicated
+ * Note / Call Activity / Email Activity resources), but existing saved workflows may
+ * still reference `resource: "activity"`, so these operations must keep working with
+ * their original behaviour and output shape.
+ */
 export async function handleActivity(
 	this: IExecuteFunctions,
 	i: number,

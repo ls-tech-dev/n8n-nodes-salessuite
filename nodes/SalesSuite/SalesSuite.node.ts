@@ -13,6 +13,10 @@ import {
 	actionButtonFields,
 	actionButtonOperations,
 } from "./actions/action-buttons";
+import {
+	callActivityFields,
+	callActivityOperations,
+} from "./actions/call-activity";
 import { activityFields, activityOperations } from "./actions/activity";
 import { apiCallFields, apiCallOperations } from "./actions/apiCall";
 import { contactFields, contactOperations } from "./actions/contact";
@@ -21,7 +25,12 @@ import {
 	contactPersonOperations,
 } from "./actions/contact-person";
 import { dealFields, dealOperations } from "./actions/deal";
+import {
+	emailActivityFields,
+	emailActivityOperations,
+} from "./actions/email-activity";
 import { formFields, formOperations } from "./actions/form";
+import { noteFields, noteOperations } from "./actions/note";
 import { propertyFields, propertyOperations } from "./actions/property";
 import { resourceSelector } from "./actions/resource.selector";
 import { route } from "./actions/router";
@@ -81,6 +90,10 @@ export class SalesSuite implements INodeType {
 			...activityOperations,
 			...activityFields,
 
+			// Call Activity
+			...callActivityOperations,
+			...callActivityFields,
+
 			// API Call
 			...apiCallOperations,
 			...apiCallFields,
@@ -97,9 +110,17 @@ export class SalesSuite implements INodeType {
 			...dealOperations,
 			...dealFields,
 
+			// Email Activity
+			...emailActivityOperations,
+			...emailActivityFields,
+
 			// Form
 			...formOperations,
 			...formFields,
+
+			// Note
+			...noteOperations,
+			...noteFields,
 
 			// Property
 			...propertyOperations,

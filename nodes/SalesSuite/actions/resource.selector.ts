@@ -12,14 +12,14 @@ export const resourceSelector: INodeProperties = {
 			description: "Preview trigger action button payloads",
 		},
 		{
-			name: "Activity",
-			value: "activity",
-			description: "Create notes and list call or email activities",
-		},
-		{
 			name: "API Call",
 			value: "apiCall",
 			description: "Make a custom API call to the SalesSuite API",
+		},
+		{
+			name: "Call Activity",
+			value: "callActivity",
+			description: "Create, list, fetch, and delete call activities",
 		},
 		{
 			name: "Contact",
@@ -38,9 +38,19 @@ export const resourceSelector: INodeProperties = {
 				"Work with deals – from creation to updates and pipeline management",
 		},
 		{
+			name: "Email Activity",
+			value: "emailActivity",
+			description: "Log, list, fetch, and delete email activities",
+		},
+		{
 			name: "Form",
 			value: "form",
 			description: "List forms and retrieve form submissions",
+		},
+		{
+			name: "Note",
+			value: "note",
+			description: "Create, list, fetch, and delete notes",
 		},
 		{
 			name: "Property",

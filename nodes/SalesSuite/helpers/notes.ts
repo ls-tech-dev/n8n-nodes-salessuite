@@ -6,16 +6,19 @@ type NoteResponse = {
 	id?: string;
 };
 
+export type NoteContentType = "text/plain" | "text/html";
+
 export async function createNote(
 	ctx: IExecuteFunctions,
 	parentId: string,
-	plainText: string,
+	text: string,
 	parentType: "contact" | "deal" = "contact",
+	contentType: NoteContentType = "text/plain",
 ): Promise<string | undefined> {
 	if (!parentId?.trim())
 		throw new ApplicationError("createNote: parentId is required");
 
-	const noteText = (plainText ?? "").trim();
+	const noteText = (text ?? "").trim();
 	if (!noteText)
 		throw new ApplicationError("createNote: note text is required");
 
@@ -26,7 +29,7 @@ export async function createNote(
 		qs,
 		body: noteText,
 		json: false,
-		headers: { "Content-Type": "text/plain" },
+		headers: { "Content-Type": contentType },
 	});
 
 	return result?.id || undefined;

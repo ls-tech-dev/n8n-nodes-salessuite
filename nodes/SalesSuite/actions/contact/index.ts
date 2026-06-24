@@ -109,6 +109,24 @@ export const contactFields: INodeProperties[] = [
 			},
 		},
 	},
+	{
+		displayName: "Initial Note Format",
+		name: "initialNoteFormat",
+		type: "options",
+		options: [
+			{ name: "Plain Text", value: "text/plain" },
+			{ name: "HTML", value: "text/html" },
+		],
+		default: "text/plain",
+		displayOptions: {
+			show: {
+				resource: ["contact"],
+				operation: ["createContact"],
+				createInitialNote: [true],
+			},
+		},
+		description: "Whether the initial note text is plain text or HTML",
+	},
 	// ===== UPDATE =====
 	{
 		displayName: "Contact Name or ID",
@@ -193,6 +211,24 @@ export const contactFields: INodeProperties[] = [
 				createInitialNote: [true],
 			},
 		},
+	},
+	{
+		displayName: "Note Format",
+		name: "initialNoteFormat",
+		type: "options",
+		options: [
+			{ name: "Plain Text", value: "text/plain" },
+			{ name: "HTML", value: "text/html" },
+		],
+		default: "text/plain",
+		displayOptions: {
+			show: {
+				resource: ["contact"],
+				operation: ["updateContact"],
+				createInitialNote: [true],
+			},
+		},
+		description: "Whether the note text is plain text or HTML",
 	},
 	// ===== UPSERT =====
 	{

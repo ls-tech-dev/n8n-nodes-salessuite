@@ -7,7 +7,7 @@ import {
 	normalizeValue,
 	splitPrefixedFields,
 } from "../../helpers/fieldMapping";
-import { createNote } from "../../helpers/notes";
+import { createNote, NoteContentType } from "../../helpers/notes";
 
 type ContactFields = IDataObject & {
 	email?: string;
@@ -89,7 +89,19 @@ async function maybeCreateNote(
 	) as string;
 	if (!initialNoteText?.trim()) return undefined;
 
-	return createNote(ctx, contactId, initialNoteText, "contact");
+	const initialNoteFormat = ctx.getNodeParameter(
+		"initialNoteFormat",
+		i,
+		"text/plain",
+	) as NoteContentType;
+
+	return createNote(
+		ctx,
+		contactId,
+		initialNoteText,
+		"contact",
+		initialNoteFormat,
+	);
 }
 
 function pickEmail(payload: {

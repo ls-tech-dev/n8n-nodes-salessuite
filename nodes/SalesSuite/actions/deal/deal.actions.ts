@@ -7,7 +7,7 @@ import {
 	normalizeValue,
 	splitPrefixedFields,
 } from "../../helpers/fieldMapping";
-import { createNote } from "../../helpers/notes";
+import { createNote, NoteContentType } from "../../helpers/notes";
 
 type DealMutationResponse = IDataObject & {
 	deal?: {
@@ -85,11 +85,17 @@ export async function handleDeal(
 					"",
 				) as string;
 				if (initialNoteText && initialNoteText.trim()) {
+					const initialNoteFormat = this.getNodeParameter(
+						"initialNoteFormat",
+						i,
+						"text/plain",
+					) as NoteContentType;
 					initialNoteId = await createNote(
 						this,
 						result.deal.id as string,
 						initialNoteText,
 						"deal",
+						initialNoteFormat,
 					);
 				}
 			}
@@ -184,11 +190,17 @@ export async function handleDeal(
 					"",
 				) as string;
 				if (initialNoteText && initialNoteText.trim()) {
+					const initialNoteFormat = this.getNodeParameter(
+						"initialNoteFormat",
+						i,
+						"text/plain",
+					) as NoteContentType;
 					initialNoteId = await createNote(
 						this,
 						dealId,
 						initialNoteText,
 						"deal",
+						initialNoteFormat,
 					);
 				}
 			}
