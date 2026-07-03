@@ -9,11 +9,18 @@ export const actionButtonOperations: INodeProperties[] = [
 		displayOptions: { show: { resource: ["actionButton"] } },
 		options: [
 			{
-				name: "Get Trigger Action Button Preview Data",
+				name: "List Trigger Action Buttons",
+				value: "listTriggerActionButtons",
+				description:
+					"Returns all trigger-type action buttons with optional filtering by card type",
+				action: "List trigger action buttons",
+			},
+			{
+				name: "List Action Button Executions",
 				value: "getTriggerActionButtonPreviewData",
 				description:
-					"Returns preview records for one trigger button with latest execution and contact/deal payload",
-				action: "Get trigger action button preview data",
+					"Lists records with stored executions for one action-button property",
+				action: "List action button executions",
 			},
 		],
 		default: "getTriggerActionButtonPreviewData",
@@ -21,6 +28,37 @@ export const actionButtonOperations: INodeProperties[] = [
 ];
 
 export const actionButtonFields: INodeProperties[] = [
+	{
+		displayName: "Card Type",
+		name: "dynamicDbTableName",
+		type: "options",
+		options: [
+			{
+				name: "All",
+				value: "",
+			},
+			{
+				name: "Contact",
+				value: "Contact",
+			},
+			{
+				name: "Contact Person",
+				value: "ContactPerson",
+			},
+			{
+				name: "Deal",
+				value: "Deal",
+			},
+		],
+		default: "Contact",
+		description: "Filter by card type",
+		displayOptions: {
+			show: {
+				resource: ["actionButton"],
+				operation: ["listTriggerActionButtons"],
+			},
+		},
+	},
 	{
 		displayName: "Trigger Action Button Name or ID",
 		name: "propertyDefinitionId",
@@ -32,7 +70,7 @@ export const actionButtonFields: INodeProperties[] = [
 		required: true,
 		default: "",
 		description:
-			'Trigger action button to preview. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			'Trigger action button to inspect. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		displayOptions: {
 			show: {
 				resource: ["actionButton"],
@@ -50,6 +88,37 @@ export const actionButtonFields: INodeProperties[] = [
 			maxValue: 100,
 		},
 		description: "Max number of results to return",
+		displayOptions: {
+			show: {
+				resource: ["actionButton"],
+				operation: ["getTriggerActionButtonPreviewData"],
+			},
+		},
+	},
+	{
+		displayName: "Cursor",
+		name: "cursor",
+		type: "string",
+		default: "",
+		description: "Opaque cursor for the next page of items",
+		displayOptions: {
+			show: {
+				resource: ["actionButton"],
+				operation: ["getTriggerActionButtonPreviewData"],
+			},
+		},
+	},
+	{
+		displayName: "Executions Per Record",
+		name: "executionsPerRecord",
+		type: "number",
+		default: 1,
+		typeOptions: {
+			minValue: 0,
+			maxValue: 100,
+		},
+		description:
+			"Number of executions to return for each record. Use 100 to return all stored executions.",
 		displayOptions: {
 			show: {
 				resource: ["actionButton"],
