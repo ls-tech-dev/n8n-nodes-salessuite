@@ -15,6 +15,13 @@ export const contactOperations: INodeProperties[] = [
 				action: "Create a contact",
 			},
 			{
+				name: "Create or Update Contact by Email",
+				value: "createOrUpdateByEmail",
+				description:
+					"Create a contact or update the existing one matched by contact-person email",
+				action: "Create or update a contact by email",
+			},
+			{
 				name: "Find Contact by Email",
 				value: "getByEmail",
 				description: "Find a contact by email address",
@@ -122,6 +129,80 @@ export const contactFields: INodeProperties[] = [
 			show: {
 				resource: ["contact"],
 				operation: ["createContact"],
+				createInitialNote: [true],
+			},
+		},
+		description: "Whether the initial note text is plain text or HTML",
+	},
+	// ===== CREATE OR UPDATE BY EMAIL =====
+	{
+		displayName:
+			"Matches the contact person by email. Creates a new contact if no contact person uses the email, updates it if exactly one does, and fails with a conflict error if several do.",
+		name: "createOrUpdateByEmailInfo",
+		type: "notice",
+		default: "",
+		displayOptions: {
+			show: { resource: ["contact"], operation: ["createOrUpdateByEmail"] },
+		},
+	},
+	{
+		displayName: "Fields",
+		name: "fields",
+		type: "resourceMapper",
+		default: { mappingMode: "defineBelow", value: null },
+		noDataExpression: true,
+		required: true,
+		displayOptions: {
+			show: { resource: ["contact"], operation: ["createOrUpdateByEmail"] },
+		},
+		typeOptions: {
+			resourceMapper: {
+				resourceMapperMethod: "getContactResourceMapperFields",
+				mode: "add",
+				fieldWords: { singular: "field", plural: "fields" },
+				addAllFields: true,
+				multiKeyMatch: true,
+				supportAutoMap: false,
+			},
+		},
+		description: "All available contact fields from your account",
+	},
+	{
+		displayName: "Also Create Initial Note?",
+		name: "createInitialNote",
+		type: "boolean",
+		default: false,
+		displayOptions: {
+			show: { resource: ["contact"], operation: ["createOrUpdateByEmail"] },
+		},
+	},
+	{
+		displayName: "Initial Note Text",
+		name: "initialNoteText",
+		type: "string",
+		typeOptions: { rows: 4 },
+		default: "",
+		displayOptions: {
+			show: {
+				resource: ["contact"],
+				operation: ["createOrUpdateByEmail"],
+				createInitialNote: [true],
+			},
+		},
+	},
+	{
+		displayName: "Initial Note Format",
+		name: "initialNoteFormat",
+		type: "options",
+		options: [
+			{ name: "Plain Text", value: "text/plain" },
+			{ name: "HTML", value: "text/html" },
+		],
+		default: "text/plain",
+		displayOptions: {
+			show: {
+				resource: ["contact"],
+				operation: ["createOrUpdateByEmail"],
 				createInitialNote: [true],
 			},
 		},
@@ -319,7 +400,7 @@ export const contactFields: INodeProperties[] = [
 			show: {
 				resource: ["contact"],
 				operation: ["getByEmail"],
-				"@version": [2],
+				"@version": [2, 3],
 			},
 		},
 	},
@@ -334,7 +415,7 @@ export const contactFields: INodeProperties[] = [
 			show: {
 				resource: ["contact"],
 				operation: ["getByEmail"],
-				"@version": [2],
+				"@version": [2, 3],
 			},
 		},
 	},
@@ -373,7 +454,7 @@ export const contactFields: INodeProperties[] = [
 			show: {
 				resource: ["contact"],
 				operation: ["searchContacts"],
-				"@version": [2],
+				"@version": [2, 3],
 			},
 		},
 	},
@@ -388,7 +469,7 @@ export const contactFields: INodeProperties[] = [
 			show: {
 				resource: ["contact"],
 				operation: ["searchContacts"],
-				"@version": [2],
+				"@version": [2, 3],
 			},
 		},
 	},
@@ -403,7 +484,7 @@ export const contactFields: INodeProperties[] = [
 			show: {
 				resource: ["contact"],
 				operation: ["searchContacts"],
-				"@version": [2],
+				"@version": [2, 3],
 			},
 		},
 	},
@@ -418,7 +499,7 @@ export const contactFields: INodeProperties[] = [
 			show: {
 				resource: ["contact"],
 				operation: ["searchContacts"],
-				"@version": [2],
+				"@version": [2, 3],
 			},
 		},
 	},
@@ -431,7 +512,7 @@ export const contactFields: INodeProperties[] = [
 			show: {
 				resource: ["contact"],
 				operation: ["searchContacts"],
-				"@version": [2],
+				"@version": [2, 3],
 			},
 		},
 	},
@@ -446,7 +527,7 @@ export const contactFields: INodeProperties[] = [
 			show: {
 				resource: ["contact"],
 				operation: ["searchContacts"],
-				"@version": [2],
+				"@version": [2, 3],
 			},
 		},
 	},

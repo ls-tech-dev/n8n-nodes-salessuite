@@ -60,7 +60,7 @@ export class SalesSuite implements INodeType {
 			dark: "file:salessuite-dark-icon.svg",
 		},
 		group: ["transform"],
-		version: [1, 2],
+		version: [1, 2, 3],
 		description:
 			"Interact with the SalesSuite API (powered by joergsebening.de)",
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',

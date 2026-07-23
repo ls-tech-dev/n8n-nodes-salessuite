@@ -6,7 +6,10 @@ export type OpeningCallResultNew = {
 export type CallActivityResultType =
 	| { type: "opening"; openingResult: OpeningCallResultNew }
 	| { type: "setting"; settingResult?: string }
-	| { type: "closing"; closingResult?: string };
+	| { type: "closing"; closingResult?: string }
+	// API 1.5.0: catch-all the API may return/accept. Never generated as a
+	// selectable option; present only for type completeness on read/filter.
+	| { type: "unknown" };
 
 type ZodLiteralDef = { value: string };
 type OpeningOptionShape = {

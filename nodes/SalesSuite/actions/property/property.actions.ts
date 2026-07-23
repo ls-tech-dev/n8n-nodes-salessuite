@@ -46,6 +46,12 @@ export async function handleProperty(
 			addIfSet(qs, "cardType", this.getNodeParameter("cardType", i, []));
 			addIfSet(
 				qs,
+				"contactCardVisibility",
+				this.getNodeParameter("contactCardVisibility", i, "all"),
+			);
+			addIfSet(qs, "sortBy", this.getNodeParameter("sortBy", i, "name"));
+			addIfSet(
+				qs,
 				"isPropertyVisibleInCard",
 				this.getNodeParameter("isPropertyVisibleInCard", i, ""),
 			);

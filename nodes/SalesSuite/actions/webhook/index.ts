@@ -208,6 +208,44 @@ export const webhookFields: INodeProperties[] = [
 		},
 	},
 
+	/** Action button filters (create) */
+	{
+		displayName: "Trigger Button Name or ID",
+		name: "actionButtonId",
+		type: "options",
+		typeOptions: { loadOptionsMethod: "loadTriggerActionButtons" },
+		default: "",
+		description:
+			'Optional filter by a specific trigger button. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		displayOptions: {
+			show: {
+				resource: ["webhook"],
+				operation: ["createWebhook"],
+				triggers: ["actionButton.executed"],
+			},
+		},
+	},
+	{
+		displayName: "Action Kind",
+		name: "actionKind",
+		type: "options",
+		default: "trigger",
+		options: [
+			{ name: "Any", value: "any" },
+			{ name: "Trigger", value: "trigger" },
+			{ name: "Link Open", value: "link_open" },
+			{ name: "Link Copy", value: "link_copy" },
+		],
+		description: "Optional filter by the executed action kind",
+		displayOptions: {
+			show: {
+				resource: ["webhook"],
+				operation: ["createWebhook"],
+				triggers: ["actionButton.executed"],
+			},
+		},
+	},
+
 	/** Update */
 	{
 		displayName: "Webhook Name or ID",
@@ -371,6 +409,44 @@ export const webhookFields: INodeProperties[] = [
 				operation: ["updateWebhook"],
 				triggers: ["activity.created"],
 				activityType: ["call"],
+			},
+		},
+	},
+
+	/** Action button filters (update) */
+	{
+		displayName: "Trigger Button Name or ID",
+		name: "actionButtonId",
+		type: "options",
+		typeOptions: { loadOptionsMethod: "loadTriggerActionButtons" },
+		default: "",
+		description:
+			'Optional filter by a specific trigger button. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		displayOptions: {
+			show: {
+				resource: ["webhook"],
+				operation: ["updateWebhook"],
+				triggers: ["actionButton.executed"],
+			},
+		},
+	},
+	{
+		displayName: "Action Kind",
+		name: "actionKind",
+		type: "options",
+		default: "trigger",
+		options: [
+			{ name: "Any", value: "any" },
+			{ name: "Trigger", value: "trigger" },
+			{ name: "Link Open", value: "link_open" },
+			{ name: "Link Copy", value: "link_copy" },
+		],
+		description: "Optional filter by the executed action kind",
+		displayOptions: {
+			show: {
+				resource: ["webhook"],
+				operation: ["updateWebhook"],
+				triggers: ["actionButton.executed"],
 			},
 		},
 	},

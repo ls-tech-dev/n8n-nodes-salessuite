@@ -184,6 +184,9 @@ export type ApiCardDefinition = {
 	id: string;
 	displayName?: string | null;
 	internalCardName?: string | null;
+	// Stable name of a system card (null for dynamic cards). Added in API 1.5.0
+	// on card responses; preferred over the localized displayName when present.
+	systemCardName?: string | null;
 	createdAt?: string | null;
 	propertyDefinitions: ApiPropertyDefinition[];
 };
@@ -201,6 +204,22 @@ const CARD_DISPLAY_NAME_MAP: Record<string, string> = {
 	"dynamicTable.deal.card.dealProperties.displayName": "Deal Information",
 };
 
+// Stable systemCardName enum (API 1.5.0) → human-readable label. Used in
+// preference to the localized displayName so labels stay stable across locales.
+const SYSTEM_CARD_NAME_MAP: Record<string, string> = {
+	ContactPerson: "Contact Person",
+	CoreData: "Contact",
+	ConnectedDeals: "Connected Deals",
+	MarketingInformation: "Marketing Information",
+	ContactPersonInfo: "Contact Person Info",
+	ContactInfo: "Contact Info",
+	DealName: "Deal Name",
+	DealStatus: "Deal Status",
+	ConnectedContact: "Connected Contact",
+	DealProperties: "Deal Information",
+	DealInfo: "Deal Info",
+};
+
 function toTimestamp(value?: string | null): number {
 	if (!value) return Number.MAX_SAFE_INTEGER;
 	const timestamp = Date.parse(value);
@@ -208,6 +227,11 @@ function toTimestamp(value?: string | null): number {
 }
 
 export function getCardDisplayName(card: ApiCardDefinition): string {
+	const systemCardName = (card.systemCardName ?? "").trim();
+	if (systemCardName && SYSTEM_CARD_NAME_MAP[systemCardName]) {
+		return SYSTEM_CARD_NAME_MAP[systemCardName];
+	}
+
 	const rawDisplayName = (card.displayName ?? "").trim();
 	if (rawDisplayName) {
 		return CARD_DISPLAY_NAME_MAP[rawDisplayName] ?? rawDisplayName;

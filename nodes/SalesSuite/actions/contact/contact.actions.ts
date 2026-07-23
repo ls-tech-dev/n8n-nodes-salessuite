@@ -112,6 +112,49 @@ function pickEmail(payload: {
 	return String(email ?? "").trim();
 }
 
+// Extracts an HTTP status code from a thrown n8n/HTTP error, checking the
+// various shapes n8n's request helper exposes it under.
+function getErrorStatusCode(error: unknown): number | undefined {
+	const e = error as {
+		httpCode?: string | number;
+		statusCode?: number;
+		status?: number;
+		response?: { statusCode?: number; status?: number };
+	};
+	const raw =
+		e?.httpCode ??
+		e?.statusCode ??
+		e?.status ??
+		e?.response?.statusCode ??
+		e?.response?.status;
+	const code = typeof raw === "string" ? Number.parseInt(raw, 10) : raw;
+	return Number.isFinite(code) ? (code as number) : undefined;
+}
+
+// Calls the server-side create-or-update-by-email endpoint and translates the
+// 409 conflict (multiple contact persons share the email) into a clear error.
+async function createOrUpdateContactByEmail(
+	ctx: IExecuteFunctions,
+	payload: ContactPayload,
+	email: string,
+): Promise<ContactMutationResponse> {
+	try {
+		return (await ssRequest(
+			ctx,
+			"POST",
+			"/v1/contact/create-or-update-by-email",
+			{ body: payload as unknown as IDataObject },
+		)) as ContactMutationResponse;
+	} catch (error) {
+		if (getErrorStatusCode(error) === 409) {
+			throw new ApplicationError(
+				`Email "${email}" is used by multiple non-archived contact persons — ambiguous. Update the contact by its ID instead.`,
+			);
+		}
+		throw error;
+	}
+}
+
 // Determines where the matched email lives on a contact lookup entry: on the
 // main contact person, or on one of the additional contact persons (with index).
 function resolveEmailSource(
@@ -195,6 +238,27 @@ export async function handleContact(
 			return { ...(result ?? {}), inputData: payload, initialNoteId };
 		}
 
+		case "createOrUpdateByEmail": {
+			const fieldsParam = this.getNodeParameter("fields", i, {} as IDataObject);
+			const payload = await sanitizeContactPayload.call(this, fieldsParam);
+
+			const email = pickEmail(payload);
+			if (!email) {
+				throw new ApplicationError(
+					"Create or Update by Email requires a contact-person email.",
+				);
+			}
+
+			const result = await createOrUpdateContactByEmail(this, payload, email);
+
+			const contactId = result?.contact?.id as string | undefined;
+			const initialNoteId = contactId
+				? await maybeCreateNote(this, i, contactId)
+				: undefined;
+
+			return { ...(result ?? {}), inputData: payload, initialNoteId };
+		}
+
 		case "updateContact": {
 			const contactId = this.getNodeParameter("contactId", i) as string;
 			if (!contactId)
@@ -265,6 +329,18 @@ export async function handleContact(
 				throw new ApplicationError(
 					"Upsert requires an email (contactPerson.email or contact.email).",
 				);
+			}
+
+			const upsertNodeVersion = this.getNode().typeVersion ?? 1;
+			if (upsertNodeVersion >= 3) {
+				// v3: delegate to the atomic server-side endpoint instead of the
+				// client-side lookup + deprecated PATCH /v1/contact/{id} chain.
+				const result = await createOrUpdateContactByEmail(this, payload, email);
+				const contactId = result?.contact?.id as string | undefined;
+				const initialNoteId = contactId
+					? await maybeCreateNote(this, i, contactId)
+					: undefined;
+				return { ...(result ?? {}), inputData: payload, initialNoteId };
 			}
 
 			const lookup = await ssRequest<ContactLookupEntry | ContactLookupEntry[]>(

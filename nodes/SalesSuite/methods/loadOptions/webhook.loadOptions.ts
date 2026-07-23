@@ -27,6 +27,7 @@ const WEBHOOK_TYPES: Array<{
 	{ name: "Deal Stage Changed", value: "deal.stageChanged" },
 	{ name: "Form Submitted", value: "form.submitted" },
 	{ name: "Activity Created", value: "activity.created" },
+	{ name: "Action Button Executed", value: "actionButton.executed" },
 ];
 
 export async function getWebhookTriggers(this: ILoadOptionsFunctions) {

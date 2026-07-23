@@ -108,6 +108,9 @@ function toCallResultOption(
 				name: option.closingResult ?? "",
 				value: JSON.stringify(option),
 			};
+		case "unknown":
+			// Not offered as a selectable create option; never reached in practice.
+			return { name: "Unknown", value: JSON.stringify(option) };
 		default:
 			assertUnreachable(type);
 	}

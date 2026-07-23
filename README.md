@@ -19,15 +19,16 @@ From contact creation to deal management and real-time triggers — automate eve
 
 ### 👤 Contacts
 
-| Action                    | Description                                                          |
-| ------------------------- | -------------------------------------------------------------------- |
-| **Create Contact**        | Add a new contact (standard create, no upsert logic).                |
-| **Find Contact by Email** | Retrieve contacts using their email address.                         |
-| **Get Contact by ID**     | Fetch a specific contact using its unique ID.                        |
-| **List Contacts**         | Browse contacts with pagination support.                             |
-| **Search Contacts**       | Perform text-based search across contacts.                           |
-| **Update Contact**        | Modify contact details by ID.                                        |
-| **Upsert Contact**        | Search by email and update if found, otherwise create a new contact. |
+| Action                               | Description                                                                             |
+| ------------------------------------ | --------------------------------------------------------------------------------------- |
+| **Create Contact**                   | Add a new contact (standard create, no upsert logic).                                   |
+| **Create or Update Contact by Email**| Server-side create-or-update matched by contact-person email (atomic; errors if the email is shared by several contact persons). |
+| **Find Contact by Email**            | Retrieve contacts using their email address.                                            |
+| **Get Contact by ID**                | Fetch a specific contact using its unique ID.                                            |
+| **List Contacts**                    | Browse contacts with pagination support.                                                |
+| **Search Contacts**                  | Perform text-based search across contacts.                                              |
+| **Update Contact**                   | Modify contact details by ID.                                                           |
+| **Upsert Contact**                   | Search by email and update if found, otherwise create a new contact.                    |
 
 ---
 
@@ -76,6 +77,7 @@ From contact creation to deal management and real-time triggers — automate eve
 | **Deal Stage Changed**       | Fires when a deal moves to another phase.   |
 | **Form Submitted**           | Fires on form submission.                   |
 | **Call Activity Created**    | Fires when a new call activity is recorded. |
+| **Action Button Executed**   | Fires when a trigger action button is run.  |
 
 ---
 

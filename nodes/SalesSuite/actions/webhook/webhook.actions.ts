@@ -53,6 +53,18 @@ function buildFilter(
 		filter.formId = formId;
 	}
 
+	if (type === "actionButton.executed") {
+		const actionButtonId = (
+			ctx.getNodeParameter("actionButtonId", i, "") as string
+		).trim();
+		if (actionButtonId) filter.propertyDefinitionId = actionButtonId;
+
+		const actionKind = (
+			ctx.getNodeParameter("actionKind", i, "") as string
+		).trim();
+		if (actionKind && actionKind !== "any") filter.actionKind = actionKind;
+	}
+
 	if (type === "activity.created") {
 		const activityType = (
 			ctx.getNodeParameter("activityType", i, "call") as string

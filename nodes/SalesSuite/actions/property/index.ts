@@ -108,6 +108,36 @@ export const propertyFields: INodeProperties[] = [
 		description: "Filter by required state",
 	},
 	{
+		displayName: "Contact Card Visibility",
+		name: "contactCardVisibility",
+		type: "options",
+		options: [
+			{ name: "All", value: "all" },
+			{ name: "Visible", value: "visible" },
+			{ name: "Hidden", value: "hidden" },
+		],
+		default: "all",
+		displayOptions: {
+			show: { resource: ["property"], operation: ["listCards"] },
+		},
+		description:
+			"Filter cards by contact view visibility. Use All to include both visible and hidden cards.",
+	},
+	{
+		displayName: "Sort By",
+		name: "sortBy",
+		type: "options",
+		options: [
+			{ name: "Name", value: "name" },
+			{ name: "Sort Index", value: "sortIndex" },
+		],
+		default: "name",
+		displayOptions: {
+			show: { resource: ["property"], operation: ["listCards"] },
+		},
+		description: "Sort the result list by the selected criterion",
+	},
+	{
 		displayName: "Property Visible in Card",
 		name: "isPropertyVisibleInCard",
 		type: "options",
