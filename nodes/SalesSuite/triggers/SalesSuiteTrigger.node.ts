@@ -186,7 +186,6 @@ export class SalesSuiteTrigger implements INodeType {
 				"Interact with the SalesSuite API (powered by joergsebening.de)",
 		},
 		credentials: [{ name: "salesSuiteApi", required: true }],
-		usableAsTool: true,
 		webhooks: [
 			{
 				name: "default",
