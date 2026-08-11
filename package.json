@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-salessuite",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Connect n8n with SalesSuite (powerd by Jörg Sebening - joergsebening.de)",
   "type": "commonjs",
   "keywords": [
