@@ -1,4 +1,9 @@
-import type { IHookFunctions, IWebhookFunctions } from "n8n-workflow";
+import type {
+	IHookFunctions,
+	IWebhookFunctions,
+	JsonObject,
+} from "n8n-workflow";
+import { NodeApiError } from "n8n-workflow";
 
 import { ssRequest } from "./apiclient";
 
@@ -16,7 +21,7 @@ type ApiErrorLike = {
 	message?: string;
 };
 
-/** Cache-TTL URL→ID Lookups (10 Min) */
+/** Cache TTL for URL→ID lookups (10 minutes) */
 export const URL_ID_CACHE_TTL_MS = 10 * 60 * 1000;
 
 export async function listWebhooks(
@@ -79,7 +84,8 @@ export async function deleteWebhookByIdWithRetry(
 				{ id, error: msg },
 			);
 			if (attempt === retries) {
-				if (opts?.failOnError) throw e;
+				if (opts?.failOnError)
+					throw new NodeApiError(ctx.getNode(), e as JsonObject);
 				return false;
 			}
 		}

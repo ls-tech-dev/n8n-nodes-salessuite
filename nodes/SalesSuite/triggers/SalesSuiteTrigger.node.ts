@@ -266,8 +266,11 @@ export class SalesSuiteTrigger implements INodeType {
 						? "activity.created"
 						: selectedEvent;
 
+				// The response check lives outside the try so that its
+				// NodeOperationError does not have to be re-thrown from the catch.
+				let res: WebhookSubscriptionResponse | undefined;
 				try {
-					const res = await ssRequest<WebhookSubscriptionResponse>(
+					res = await ssRequest<WebhookSubscriptionResponse>(
 						this,
 						"POST",
 						"/v1/webhooks/subscription",
@@ -279,26 +282,25 @@ export class SalesSuiteTrigger implements INodeType {
 							},
 						},
 					);
-
-					if (!res?.id) {
-						throw new NodeOperationError(
-							this.getNode(),
-							"SalesSuite: Could not read subscriptionId from response.",
-							{ description: JSON.stringify(res || {}) },
-						);
-					}
-
-					const webhookData = this.getWorkflowStaticData(
-						"node",
-					) as TriggerStaticData;
-					webhookData.subscriptionId = res.id;
-					return true;
 				} catch (e) {
-					if (e instanceof NodeOperationError) throw e;
 					throw new NodeApiError(this.getNode(), e as JsonObject, {
 						message: "Failed to create webhook subscription",
 					});
 				}
+
+				if (!res?.id) {
+					throw new NodeOperationError(
+						this.getNode(),
+						"SalesSuite: Could not read subscriptionId from response.",
+						{ description: JSON.stringify(res || {}) },
+					);
+				}
+
+				const webhookData = this.getWorkflowStaticData(
+					"node",
+				) as TriggerStaticData;
+				webhookData.subscriptionId = res.id;
+				return true;
 			},
 
 			async delete(this: IHookFunctions): Promise<boolean> {

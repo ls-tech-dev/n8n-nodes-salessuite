@@ -138,7 +138,7 @@ export const dealFields: INodeProperties[] = [
 		description: "Additional deal fields to set on create",
 	},
 
-	// Initial Note (optional) bei CREATE
+	// Initial note (optional) on CREATE
 	{
 		displayName: "Also Create Initial Note?",
 		name: "createInitialNote",
@@ -320,7 +320,7 @@ export const dealFields: INodeProperties[] = [
 			"Fields to update. Leave fields empty to keep their current value.",
 	},
 
-	// Initial Note (optional) bei UPDATE
+	// Initial note (optional) on UPDATE
 	{
 		displayName: "Also Create Initial Note?",
 		name: "createInitialNote",

@@ -1,4 +1,11 @@
-import { ApplicationError, IDataObject, IExecuteFunctions } from "n8n-workflow";
+import {
+	ApplicationError,
+	IDataObject,
+	IExecuteFunctions,
+	JsonObject,
+	NodeApiError,
+	NodeOperationError,
+} from "n8n-workflow";
 
 import { ssRequest } from "../../helpers/apiclient";
 import {
@@ -147,11 +154,12 @@ async function createOrUpdateContactByEmail(
 		)) as ContactMutationResponse;
 	} catch (error) {
 		if (getErrorStatusCode(error) === 409) {
-			throw new ApplicationError(
+			throw new NodeOperationError(
+				ctx.getNode(),
 				`Email "${email}" is used by multiple non-archived contact persons — ambiguous. Update the contact by its ID instead.`,
 			);
 		}
-		throw error;
+		throw new NodeApiError(ctx.getNode(), error as JsonObject);
 	}
 }
 
@@ -193,7 +201,11 @@ function isMainContactPersonEmail(
 
 // Accepts either an already-parsed array/object (n8n "json" field) or a JSON
 // string and returns the parsed value. Throws a readable error on bad JSON.
-function parseJsonParam(raw: unknown, fieldName: string): unknown {
+function parseJsonParam(
+	ctx: IExecuteFunctions,
+	raw: unknown,
+	fieldName: string,
+): unknown {
 	if (raw === undefined || raw === null || raw === "") return undefined;
 	if (typeof raw !== "string") return raw;
 	const trimmed = raw.trim();
@@ -201,7 +213,10 @@ function parseJsonParam(raw: unknown, fieldName: string): unknown {
 	try {
 		return JSON.parse(trimmed);
 	} catch {
-		throw new ApplicationError(`${fieldName} must be valid JSON.`);
+		throw new NodeOperationError(
+			ctx.getNode(),
+			`${fieldName} must be valid JSON.`,
+		);
 	}
 }
 
@@ -543,10 +558,12 @@ export async function handleContact(
 				const page = this.getNodeParameter("page", i, 0) as number;
 				const pageSize = this.getNodeParameter("pageSize", i, 25) as number;
 				const orFilterGroups = parseJsonParam(
+					this,
 					this.getNodeParameter("orFilterGroups", i, "[]"),
 					"orFilterGroups",
 				);
 				const orderBy = parseJsonParam(
+					this,
 					this.getNodeParameter("orderBy", i, "[]"),
 					"orderBy",
 				);

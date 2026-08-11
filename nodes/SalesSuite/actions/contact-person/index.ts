@@ -56,7 +56,7 @@ export const contactPersonFields: INodeProperties[] = [
 		displayOptions: {
 			show: { resource: ["contactPerson"], operation: ["create"] },
 		},
-		description: "ID des Kontakts, dem die Kontaktperson zugeordnet wird",
+		description: "ID of the contact the contact person is assigned to",
 	},
 	{
 		displayName: "Make Main Contact Person?",
@@ -120,7 +120,7 @@ export const contactPersonFields: INodeProperties[] = [
 				],
 			},
 		},
-		description: "ID der Kontaktperson",
+		description: "ID of the contact person",
 	},
 
 	// ===== UPDATE =====
