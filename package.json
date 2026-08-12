@@ -1,24 +1,25 @@
 {
-  "name": "n8n-nodes-salessuite",
+  "name": "@salessuite/n8n-nodes-salessuite",
   "version": "1.2.2",
-  "description": "Connect n8n with SalesSuite (powerd by Jörg Sebening - joergsebening.de)",
+  "description": "Official n8n integration for SalesSuite",
   "type": "commonjs",
   "keywords": [
     "n8n-community-node-package",
     "salessuite"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/rjsebening/n8n-nodes-salessuite#readme",
+  "homepage": "https://github.com/ls-tech-dev/n8n-nodes-salessuite#readme",
   "author": {
-    "name": "Jörg Sebening",
-    "email": "dev@joerg-sebening.com"
+    "name": "SalesSuite CRM FlexCo",
+    "email": "kontakt@salessuite.com",
+    "url": "https://salessuite.com"
   },
   "bugs": {
-    "url": "https://github.com/rjsebening/n8n-nodes-salessuite/issues"
+    "url": "https://github.com/ls-tech-dev/n8n-nodes-salessuite/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/rjsebening/n8n-nodes-salessuite.git"
+    "url": "https://github.com/ls-tech-dev/n8n-nodes-salessuite.git"
   },
   "engines": {
     "node": ">=20.15"

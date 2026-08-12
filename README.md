@@ -1,19 +1,21 @@
 # n8n-nodes-salessuite
 
 ![n8n Community Node](https://img.shields.io/badge/n8n-community--node-FF6D5A)
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![npm version](https://img.shields.io/npm/v/@salessuite/n8n-nodes-salessuite)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 
-### n8n Integration for **SalesSuite – the best CRM built on the Setter-Closer principle**
+### Official n8n Integration for **SalesSuite – the CRM built for the Setter-Closer principle**
 
 Automate your contact, deal, and activity workflows, react to real-time events, and keep your pipeline moving — **without manual work**.
 
 
 ## 🧭 Overview
 
-This community node connects **SalesSuite (Setter-Closer CRM)** seamlessly with your n8n workflows.
+This official community node connects **SalesSuite (Setter-Closer CRM)** seamlessly with your n8n workflows.
 From contact creation to deal management and real-time triggers — automate every key revenue process end-to-end.
+
+The integration was developed for SalesSuite and is maintained by Jörg Sebening together with the SalesSuite team.
 
 ## ⚙️ Key Capabilities
 
@@ -109,31 +111,27 @@ A built-in credential test within n8n ensures your API key is valid before runni
 2. Enter package name:
 
 ```bash
-# Option A — Scoped (recommended)
-@rjsebening/n8n-nodes-salessuite
-
-# Option B — Unscoped
-n8n-nodes-salessuite
+@salessuite/n8n-nodes-salessuite
 ```
 
 3. **Restart n8n** – the node will now appear in the list.
 
 
 
-## 📬 About the Author
+## 📬 Maintained for SalesSuite
 
-I’m **[Rezk Jörg Sebening](https://github.com/rjsebening)** – Automation & Systems Expert (DACH).
-I build n8n nodes and process automation systems that help agencies, coaches, and service providers scale **without manual work**.
+This integration was built for **SalesSuite** and is maintained by **[Jörg Sebening](https://github.com/rjsebening)** in collaboration with the SalesSuite team.
 
-👉 Follow me on GitHub for new DACH integrations and automation templates.
+👉 [SalesSuite](https://salessuite.com) · [GitHub](https://github.com/ls-tech-dev/n8n-nodes-salessuite) · [Support](https://salessuite.com/kontaktformular)
 
-## ⚖️ Legal Disclaimer
+## 🙌 Huge Thanks to the Maintainer
 
-This community node is **not affiliated with SalesSuite** (no partnership, no sponsorship, no official endorsement).
-It simply connects to publicly available API endpoints.
+A huge thank-you to **[Jörg Sebening](https://github.com/rjsebening)**, who built this integration for SalesSuite, laid the foundation for everything it supports today, and continues to maintain it. His work, care, and ongoing support make this official SalesSuite integration possible.
 
-* Community developed & maintained
-* For API-related issues → contact **SalesSuite Support**
+## ⚖️ Legal
+
+* Official SalesSuite integration, developed and maintained for use with the SalesSuite Public API
+* For API-related issues → contact **[SalesSuite Support](https://salessuite.com/kontaktformular)**
 * All trademarks & logos belong to their respective owners
 
 ## 📄 License

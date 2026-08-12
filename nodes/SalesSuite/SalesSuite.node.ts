@@ -61,14 +61,12 @@ export class SalesSuite implements INodeType {
 		},
 		group: ["transform"],
 		version: [1, 2, 3],
-		description:
-			"Interact with the SalesSuite API (powered by joergsebening.de)",
+		description: "Interact with the official SalesSuite API",
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
 		defaults: {
 			name: "SalesSuite",
 			// @ts-expect-error free-form description
-			description:
-				"Interact with the SalesSuite API (powered by joergsebening.de)",
+			description: "Interact with the official SalesSuite API",
 		},
 		inputs: [NodeConnectionTypes.Main],
 		outputs: [NodeConnectionTypes.Main],

@@ -6,12 +6,12 @@
 	"resources": {
 		"credentialDocumentation": [
 			{
-				"url": "https://github.com/rjsebening/n8n-nodes-salessuite/blob/main/CREDENTIALS.md"
+				"url": "https://github.com/ls-tech-dev/n8n-nodes-salessuite/blob/main/CREDENTIALS.md"
 			}
 		],
 		"primaryDocumentation": [
 			{
-				"url": "https://github.com/rjsebening/n8n-nodes-salessuite/blob/main/README.md"
+				"url": "https://github.com/ls-tech-dev/n8n-nodes-salessuite/blob/main/README.md"
 			}
 		]
 	}

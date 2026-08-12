@@ -10,7 +10,7 @@ export class SalesSuiteApi implements ICredentialType {
 	name = "salesSuiteApi";
 	displayName = "SalesSuite API";
 	documentationUrl =
-		"https://github.com/rjsebening/n8n-nodes-salessuite/blob/main/CREDENTIALS.md";
+		"https://github.com/ls-tech-dev/n8n-nodes-salessuite/blob/main/CREDENTIALS.md";
 	icon: Icon = {
 		light: "file:salessuite-light-icon.svg",
 		dark: "file:salessuite-dark-icon.svg",

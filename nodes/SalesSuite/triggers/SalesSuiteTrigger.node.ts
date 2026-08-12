@@ -176,14 +176,12 @@ export class SalesSuiteTrigger implements INodeType {
 		},
 		group: ["trigger"],
 		version: 1,
-		description:
-			"Interact with the SalesSuite API (powered by joergsebening.de)",
+		description: "Start a workflow when an event occurs in SalesSuite",
 		subtitle: '={{$parameter["events"]}}',
 		defaults: {
 			name: "SalesSuite Trigger",
 			// @ts-expect-error free-form description
-			description:
-				"Interact with the SalesSuite API (powered by joergsebening.de)",
+			description: "Start a workflow when an event occurs in SalesSuite",
 		},
 		credentials: [{ name: "salesSuiteApi", required: true }],
 		webhooks: [
