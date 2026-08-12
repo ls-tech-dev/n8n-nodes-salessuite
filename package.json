@@ -1,6 +1,6 @@
 {
   "name": "@salessuite/n8n-nodes-salessuite",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Official n8n integration for SalesSuite",
   "type": "commonjs",
   "keywords": [

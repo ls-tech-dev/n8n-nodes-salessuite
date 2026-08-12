@@ -1,6 +1,6 @@
 {
-	"node": "n8n-nodes-base.SalesSuiteTrigger",
-	"nodeVersion": "1.0.0",
+	"node": "@salessuite/n8n-nodes-salessuite.salesSuiteTrigger",
+	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": ["Sales", "Communication"],
 	"resources": {
