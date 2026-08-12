@@ -49,12 +49,7 @@ jobs:
       - name: Scan community package rules
         run: npm run lint:scan
 
-      - name: Publish n8n-nodes-salessuite
-        run: npm publish --provenance --access public
-        env:
-          RELEASE_MODE: 'true'
-
-      - name: Publish @rjsebening/n8n-nodes-salessuite
+      - name: Publish @salessuite/n8n-nodes-salessuite
         shell: bash
         run: |
           set -euo pipefail
@@ -63,7 +58,7 @@ jobs:
           cp -R dist "${publish_dir}/dist"
           cp README.md LICENSE.md package.json "${publish_dir}/"
 
-          npm pkg set --prefix "${publish_dir}" name="@rjsebening/n8n-nodes-salessuite"
+          npm pkg set --prefix "${publish_dir}" name="@salessuite/n8n-nodes-salessuite"
           npm publish "${publish_dir}" --provenance --access public --ignore-scripts
         env:
           RELEASE_MODE: 'true'
