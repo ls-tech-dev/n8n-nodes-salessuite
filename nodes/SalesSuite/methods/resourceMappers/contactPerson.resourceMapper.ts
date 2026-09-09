@@ -1,7 +1,8 @@
-import type {
-	ILoadOptionsFunctions,
-	ResourceMapperField,
-	ResourceMapperFields,
+import {
+	type ILoadOptionsFunctions,
+	NodeOperationError,
+	type ResourceMapperField,
+	type ResourceMapperFields,
 } from "n8n-workflow";
 
 import {
@@ -15,6 +16,8 @@ import {
 	sortCardProperties,
 	sortCardsByCreatedAt,
 } from "../../helpers/fieldMapping";
+import { getCredentialLanguage } from "../../helpers/apiclient";
+import { joinFieldAndGroupLabel } from "../../helpers/labels";
 import { canUsePropertyAsField } from "./canUsePropertyAsField";
 import { mapTypeToResourceMapper } from "./mapTypeToResourceMapper";
 
@@ -23,6 +26,7 @@ export async function getContactPersonResourceMapperFields(
 ): Promise<ResourceMapperFields> {
 	const data = await loadContactPersonFieldData(this);
 	const properties = await loadContactPersonProperties(this);
+	const language = await getCredentialLanguage(this);
 	const cards = sortCardsByCreatedAt(
 		Array.isArray(data?.cards) ? data.cards : [],
 	);
@@ -36,11 +40,10 @@ export async function getContactPersonResourceMapperFields(
 
 	const addField = (field: ApiPropertyDefinition, groupLabel: string) => {
 		if (!field?.propertyIdentifier) return;
-		if (
-			field.dynamicDbTableName !== "Contact" &&
-			field.dynamicDbTableName !== "ContactPerson"
-		)
-			return;
+		// The field data is loaded from /v1/fields/contact, which also carries the
+		// Contact table. Only contact-person fields are accepted by the
+		// contact-person endpoints, so everything else is dropped here.
+		if (field.dynamicDbTableName !== "ContactPerson") return;
 
 		const property = propertiesById.get(field.id) ?? field;
 		if (!canUsePropertyAsField(property)) return;
@@ -54,10 +57,10 @@ export async function getContactPersonResourceMapperFields(
 
 		const entry = {
 			id: key,
-			displayName: `${fieldLabel} - ${groupLabel}`,
+			displayName: joinFieldAndGroupLabel(fieldLabel, groupLabel),
 			required: !!(field.required ?? property.required),
-			canBeUsedToMatch: isEmail && field.dynamicDbTableName === "ContactPerson",
-			defaultMatch: isEmail && field.dynamicDbTableName === "ContactPerson",
+			canBeUsedToMatch: isEmail,
+			defaultMatch: isEmail,
 			display: true,
 			type: typeInfo.type,
 			options: typeInfo.options,
@@ -74,7 +77,10 @@ export async function getContactPersonResourceMapperFields(
 	if (cards.length > 0) {
 		for (const card of cards) {
 			const cardLabel = getCardDisplayName(card);
-			for (const field of sortCardProperties(card.propertyDefinitions ?? [])) {
+			for (const field of sortCardProperties(
+				card.propertyDefinitions ?? [],
+				language,
+			)) {
 				addField(field, cardLabel);
 			}
 		}
@@ -83,9 +89,24 @@ export async function getContactPersonResourceMapperFields(
 	for (const prop of properties) {
 		const key = prefixKey(prop.dynamicDbTableName, prop.propertyIdentifier);
 		if (mappedByKey.has(key)) continue;
-		// Fall back to the table name (Contact / ContactPerson) instead of a
-		// generic "Other" group for uncarded properties.
+		// Fall back to the table name instead of a generic "Other" group for
+		// properties that are not assigned to any card.
 		addField(prop, prop.dynamicDbTableName);
+	}
+
+	// An empty field list is never legitimate: every tenant has at least the
+	// system properties. Failing loudly here surfaces a changed API response
+	// format instead of silently rendering a mapper without any fields.
+	if (mapped.length === 0) {
+		throw new NodeOperationError(
+			this.getNode(),
+			"SalesSuite: no usable contact person fields were returned by /v1/fields/contact.",
+			{
+				description:
+					"The API response format may have changed. Check that ContactPerson properties still carry resolvedPropertyDefinition.",
+				level: "warning",
+			},
+		);
 	}
 
 	return { fields: mapped };

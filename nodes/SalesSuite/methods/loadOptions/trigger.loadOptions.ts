@@ -1,6 +1,7 @@
 import type { ILoadOptionsFunctions, INodePropertyOptions } from "n8n-workflow";
 
-import { ssRequest } from "../../helpers/apiclient";
+import { getCredentialLanguage, ssRequest } from "../../helpers/apiclient";
+import { compareLabels } from "../../helpers/labels";
 import {
 	getDisplayName,
 	loadContactProperties,
@@ -16,12 +17,11 @@ type PipelinePayload = {
 
 type FormPayload = { formId: string; name: string };
 
-type CallTypePayload = { id: string; name: string; category?: string };
-
 export async function loadContactPropertiesAsOptions(
 	this: ILoadOptionsFunctions,
 ): Promise<INodePropertyOptions[]> {
 	const properties = await loadContactProperties(this);
+	const language = await getCredentialLanguage(this);
 
 	return properties
 		.filter(
@@ -30,9 +30,7 @@ export async function loadContactPropertiesAsOptions(
 				p.dynamicDbTableName === "ContactPerson",
 		)
 		.sort((a, b) =>
-			getDisplayName(a).localeCompare(getDisplayName(b), "en", {
-				sensitivity: "base",
-			}),
+			compareLabels(language)(getDisplayName(a), getDisplayName(b)),
 		)
 		.map((p) => ({
 			name: getDisplayName(p),
@@ -44,12 +42,11 @@ export async function loadDealPropertiesAsOptions(
 	this: ILoadOptionsFunctions,
 ): Promise<INodePropertyOptions[]> {
 	const properties = await loadDealProperties(this);
+	const language = await getCredentialLanguage(this);
 	return properties
 		.filter((p) => p.dynamicDbTableName === "Deal" && canUsePropertyAsField(p))
 		.sort((a, b) =>
-			getDisplayName(a).localeCompare(getDisplayName(b), "en", {
-				sensitivity: "base",
-			}),
+			compareLabels(language)(getDisplayName(a), getDisplayName(b)),
 		)
 		.map((p) => ({
 			name: getDisplayName(p),
@@ -124,15 +121,4 @@ export async function loadTriggerActionButtons(
 		name: `${b.fieldName} (${b.dynamicDbTableName} - ${b.shortName})`,
 		value: b.propertyDefinitionId,
 	}));
-}
-
-export async function loadPhoneCallActivityTypes(
-	this: ILoadOptionsFunctions,
-): Promise<INodePropertyOptions[]> {
-	const data = (await ssRequest(
-		this,
-		"GET",
-		"/v1/call-types",
-	)) as CallTypePayload[];
-	return (data ?? []).map((t) => ({ name: t.name, value: t.id }));
 }

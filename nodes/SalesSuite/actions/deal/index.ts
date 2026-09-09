@@ -1,5 +1,7 @@
 import { INodeProperties } from "n8n-workflow";
 
+import { makeSearchFilterFields } from "../shared/searchFilter.properties";
+
 export const dealOperations: INodeProperties[] = [
 	{
 		displayName: "Operation",
@@ -56,6 +58,13 @@ export const dealOperations: INodeProperties[] = [
 				value: "getPipelines",
 				description: "List all pipelines and phases",
 				action: "List pipelines",
+			},
+			{
+				name: "Search Deals",
+				value: "searchDeals",
+				description:
+					"Search deals with filters and sorting, optionally scoped to a pipeline or phase",
+				action: "Search deals",
 			},
 			{
 				name: "Update Deal (Per Deal-ID)",
@@ -546,4 +555,45 @@ export const dealFields: INodeProperties[] = [
 			show: { resource: ["deal"], operation: ["changeDealPipelinePhase"] },
 		},
 	},
+
+	// ===== SEARCH DEALS =====
+	...makeSearchFilterFields({
+		resource: "deal",
+		operation: "searchDeals",
+		entityPlural: "deals",
+		extraFields: [
+			{
+				displayName: "Pipeline Name or ID",
+				name: "pipelineId",
+				type: "options",
+				typeOptions: { loadOptionsMethod: "getSearchScopePipelines" },
+				default: "",
+				description:
+					'Optional. Restrict the search to one pipeline, or keep "All Pipelines" to search every pipeline. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				displayOptions: {
+					show: { resource: ["deal"], operation: ["searchDeals"] },
+				},
+			},
+			{
+				displayName: "Phase Name or ID",
+				name: "phaseId",
+				type: "options",
+				typeOptions: {
+					loadOptionsMethod: "getSearchScopePhases",
+					loadOptionsDependsOn: ["pipelineId"],
+					reloadOptions: true,
+				},
+				default: "",
+				description:
+					'Optional. Restrict the search to one phase of the selected pipeline. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				displayOptions: {
+					show: {
+						resource: ["deal"],
+						operation: ["searchDeals"],
+						pipelineId: [{ _cnd: { exists: true } }],
+					},
+				},
+			},
+		],
+	}),
 ];

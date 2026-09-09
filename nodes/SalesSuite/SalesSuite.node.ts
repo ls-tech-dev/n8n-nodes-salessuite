@@ -143,6 +143,7 @@ export class SalesSuite implements INodeType {
 			...Loaders.phoneCallLoaders,
 			...Loaders.triggerLoaders,
 			...Loaders.userLoaders,
+			...Loaders.searchLoaders,
 		},
 		resourceMapping: {
 			getContactResourceMapperFields,

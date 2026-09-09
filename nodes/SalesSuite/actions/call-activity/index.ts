@@ -138,17 +138,33 @@ export const callActivityFields: INodeProperties[] = [
 		displayName: "Call Type Name or ID",
 		name: "callTypeId",
 		type: "options",
+		typeOptions: { loadOptionsMethod: "loadPhoneCallActivityTypesForCreate" },
+		required: true,
+		default: "",
+		displayOptions: {
+			show: {
+				resource: ["callActivity"],
+				operation: ["createCallActivity"],
+			},
+		},
+		description:
+			'Choose the call type. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+	},
+	{
+		displayName: "Call Type Name or ID",
+		name: "callTypeId",
+		type: "options",
 		typeOptions: { loadOptionsMethod: "loadPhoneCallActivityTypes" },
 		required: true,
 		default: "",
 		displayOptions: {
 			show: {
 				resource: ["callActivity"],
-				operation: ["createCallActivity", "getCallTypeById"],
+				operation: ["getCallTypeById"],
 			},
 		},
 		description:
-			'Choose the call type. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+			'Choose the call type, or "Any Call Type" to return every call type. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 	},
 	{
 		displayName: "Caller User Name or ID",
@@ -218,7 +234,7 @@ export const callActivityFields: INodeProperties[] = [
 		name: "callResult",
 		type: "options",
 		typeOptions: {
-			loadOptionsMethod: "loadCallResultTypes",
+			loadOptionsMethod: "loadCallResultTypesForCreate",
 			loadOptionsDependsOn: ["callTypeId"],
 		},
 		required: true,

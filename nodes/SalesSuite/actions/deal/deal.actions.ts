@@ -8,6 +8,7 @@ import {
 	splitPrefixedFields,
 } from "../../helpers/fieldMapping";
 import { createNote, NoteContentType } from "../../helpers/notes";
+import { runEntitySearch } from "../../helpers/searchRequest";
 
 type DealMutationResponse = IDataObject & {
 	deal?: {
@@ -430,6 +431,25 @@ export async function handleDeal(
 			});
 
 			return result ?? {};
+		}
+
+		case "searchDeals": {
+			const pipelineId = (
+				this.getNodeParameter("pipelineId", i, "") as string
+			).trim();
+			const phaseId = (
+				this.getNodeParameter("phaseId", i, "") as string
+			).trim();
+
+			const extraBody: IDataObject = {};
+			if (pipelineId) extraBody.pipelineId = pipelineId;
+			if (phaseId) extraBody.phaseId = phaseId;
+
+			return await runEntitySearch(this, i, {
+				path: "/v1/deal/search",
+				resultKey: "deals",
+				extraBody,
+			});
 		}
 
 		default:
