@@ -1,5 +1,7 @@
 import type { INodeProperties } from "n8n-workflow";
 
+import { makeSearchFilterFields } from "../shared/searchFilter.properties";
+
 export const contactOperations: INodeProperties[] = [
 	{
 		displayName: "Operation",
@@ -48,7 +50,8 @@ export const contactOperations: INodeProperties[] = [
 			{
 				name: "Search Contacts",
 				value: "searchContacts",
-				description: "Search contacts by text",
+				description:
+					"Search contacts with filters and sorting (structured filter builder on node version 3)",
 				action: "Search contacts",
 			},
 			{
@@ -454,7 +457,7 @@ export const contactFields: INodeProperties[] = [
 			show: {
 				resource: ["contact"],
 				operation: ["searchContacts"],
-				"@version": [2, 3],
+				"@version": [2],
 			},
 		},
 	},
@@ -469,7 +472,7 @@ export const contactFields: INodeProperties[] = [
 			show: {
 				resource: ["contact"],
 				operation: ["searchContacts"],
-				"@version": [2, 3],
+				"@version": [2],
 			},
 		},
 	},
@@ -484,7 +487,7 @@ export const contactFields: INodeProperties[] = [
 			show: {
 				resource: ["contact"],
 				operation: ["searchContacts"],
-				"@version": [2, 3],
+				"@version": [2],
 			},
 		},
 	},
@@ -499,7 +502,7 @@ export const contactFields: INodeProperties[] = [
 			show: {
 				resource: ["contact"],
 				operation: ["searchContacts"],
-				"@version": [2, 3],
+				"@version": [2],
 			},
 		},
 	},
@@ -512,7 +515,7 @@ export const contactFields: INodeProperties[] = [
 			show: {
 				resource: ["contact"],
 				operation: ["searchContacts"],
-				"@version": [2, 3],
+				"@version": [2],
 			},
 		},
 	},
@@ -527,10 +530,18 @@ export const contactFields: INodeProperties[] = [
 			show: {
 				resource: ["contact"],
 				operation: ["searchContacts"],
-				"@version": [2, 3],
+				"@version": [2],
 			},
 		},
 	},
+
+	// ===== SEARCH CONTACTS (v3 filter builder) =====
+	...makeSearchFilterFields({
+		resource: "contact",
+		operation: "searchContacts",
+		versions: [3],
+		entityPlural: "contacts",
+	}),
 	{
 		displayName: "Page",
 		name: "page",

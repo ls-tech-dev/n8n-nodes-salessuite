@@ -22,6 +22,26 @@ function resolveTarget(
 	return { callTarget, contactId };
 }
 
+const CALL_RESULT_TYPES = ["opening", "closing", "setting", "unknown"];
+
+function assertCreatableCallResult(raw: unknown, parsed: unknown): IDataObject {
+	if (raw === "any") {
+		throw new ApplicationError(
+			'"Any Call Result" cannot be used when creating a call activity. It is only valid as a webhook or trigger filter. Pick a concrete call result.',
+		);
+	}
+	const type =
+		parsed && typeof parsed === "object" && !Array.isArray(parsed)
+			? (parsed as IDataObject).type
+			: undefined;
+	if (typeof type !== "string" || !CALL_RESULT_TYPES.includes(type)) {
+		throw new ApplicationError(
+			`callResult must be one of the offered options (${CALL_RESULT_TYPES.join(", ")}). Received: ${JSON.stringify(raw)}`,
+		);
+	}
+	return parsed as IDataObject;
+}
+
 function parseCallResult(raw: unknown): unknown {
 	if (typeof raw !== "string") return raw;
 	const trimmed = raw.trim();
@@ -67,6 +87,11 @@ export async function handleCallActivity(
 			).trim();
 
 			if (!callTypeId) throw new ApplicationError("callTypeId is required.");
+			if (callTypeId === "any") {
+				throw new ApplicationError(
+					'"Any Call Type" cannot be used when creating a call activity. It is only valid as a webhook or trigger filter. Pick a concrete call type.',
+				);
+			}
 			if (!callerUserId)
 				throw new ApplicationError("callerUserId is required.");
 			if (!callerPhoneNumber)
@@ -78,7 +103,10 @@ export async function handleCallActivity(
 				callTypeId,
 				callerUserId,
 				durationSec,
-				callResult: parseCallResult(callResultRaw) as IDataObject,
+				callResult: assertCreatableCallResult(
+					callResultRaw,
+					parseCallResult(callResultRaw),
+				),
 				callerPhoneNumber,
 				calleePhoneNumber,
 			};

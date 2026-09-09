@@ -1,7 +1,7 @@
 {
   "name": "n8n-nodes-salessuite",
   "version": "1.2.4",
-  "description": "Connect n8n with SalesSuite (powerd by Jörg Sebening - joergsebening.de)",
+  "description": "Connect n8n with SalesSuite (powered by Jörg Sebening - joergsebening.de)",
   "type": "commonjs",
   "keywords": [
     "n8n-community-node-package",
@@ -33,6 +33,7 @@
     "lint:node": "n8n-node lint",
     "lint:all": "npm run lint && npm run lint:node",
     "lint:scan": "node scripts/scan-local.mjs",
+    "test": "npm run build && node scripts/test-search-filter.cjs && node scripts/test-search-schema.cjs",
     "release": "n8n-node release",
     "prepublishOnly": "n8n-node prerelease"
   },
@@ -56,6 +57,7 @@
   },
   "devDependencies": {
     "@n8n/node-cli": "^0.43.2",
+    "ajv": "^6.12.6",
     "@types/node": "^24.10.1",
     "@typescript-eslint/parser": "^8.52.0",
     "eslint": "^9.39.4",

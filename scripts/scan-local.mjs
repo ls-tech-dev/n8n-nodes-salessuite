@@ -21,7 +21,7 @@
  *   dist   - dist/ JS + package.json, i.e. what actually ends up in the npm tarball
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -34,19 +34,26 @@ const TOOLS_MANIFEST = {
 	private: true,
 	description: 'Isolated install of the n8n community-package scanner. Not part of the package.',
 	dependencies: {
-		'@n8n/scan-community-package': '0.32.0',
+		'@n8n/scan-community-package': '0.35.0',
 		// Pinned so it hoists ahead of the scanner's own typescript@7.0.2, which the parser rejects.
 		typescript: '6.0.3',
 	},
 };
 
-const scannerEntry = path.join(
-	toolsDir,
-	'node_modules/@n8n/scan-community-package/scanner/scanner.mjs',
-);
+const scannerDir = path.join(toolsDir, 'node_modules/@n8n/scan-community-package');
+const scannerEntry = path.join(scannerDir, 'scanner/scanner.mjs');
+const pinnedVersion = TOOLS_MANIFEST.dependencies['@n8n/scan-community-package'];
 
-if (!existsSync(scannerEntry)) {
-	console.log('Installing the n8n community-package scanner into scripts/.scan-tools ...');
+function installedScannerVersion() {
+	try {
+		return JSON.parse(readFileSync(path.join(scannerDir, 'package.json'), 'utf8')).version;
+	} catch {
+		return null;
+	}
+}
+
+if (!existsSync(scannerEntry) || installedScannerVersion() !== pinnedVersion) {
+	console.log(`Installing @n8n/scan-community-package@${pinnedVersion} into scripts/.scan-tools ...`);
 	execFileSync('mkdir', ['-p', toolsDir]);
 	writeFileSync(path.join(toolsDir, 'package.json'), `${JSON.stringify(TOOLS_MANIFEST, null, 2)}\n`);
 	execFileSync('npm', ['install', '--silent', '--no-audit', '--no-fund'], {
@@ -54,6 +61,13 @@ if (!existsSync(scannerEntry)) {
 		stdio: 'inherit',
 	});
 }
+
+const actualVersion = installedScannerVersion();
+if (actualVersion !== pinnedVersion) {
+	console.error(`Expected scanner ${pinnedVersion}, found ${actualVersion ?? 'nothing'}.`);
+	process.exit(1);
+}
+console.log(`Scanner: @n8n/scan-community-package@${actualVersion}`);
 
 const { analyzePackage, SOURCE_FILE_PATTERNS } = await import(pathToFileURL(scannerEntry).href);
 

@@ -21,6 +21,7 @@ export class SalesSuiteApi implements ICredentialType {
 		properties: {
 			headers: {
 				"x-api-key": "={{$credentials.apiKey}}",
+				"x-lang": "={{$credentials.language}}",
 			},
 		},
 	};
@@ -41,6 +42,24 @@ export class SalesSuiteApi implements ICredentialType {
 			typeOptions: { password: true },
 			default: "",
 			description: "SalesSuite API Key",
+		},
+		{
+			displayName: "Response Language",
+			name: "language",
+			type: "options",
+			default: "de",
+			options: [
+				{
+					name: "Deutsch (DE)",
+					value: "de",
+				},
+				{
+					name: "English (EN)",
+					value: "en",
+				},
+			],
+			description:
+				"Language used for translated text in API responses. Sent as the x-lang header with every request. Credentials saved before this option existed send no language and keep using the tenant default locale until they are saved again.",
 		},
 	];
 

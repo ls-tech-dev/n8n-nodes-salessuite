@@ -47,6 +47,20 @@ function normalizePath(path: string): string {
 	return normalizedPath;
 }
 
+/**
+ * Response language configured on the credential, used as the collation locale
+ * when sorting labels the API returned in that language. Reads the credential
+ * only — no HTTP request.
+ */
+export async function getCredentialLanguage(ctx: ApiContext): Promise<string> {
+	try {
+		const credentials = await ctx.getCredentials("salesSuiteApi");
+		return String(credentials.language || "").trim() || "en";
+	} catch {
+		return "en";
+	}
+}
+
 export async function ssRequest(
 	ctx: ApiContext,
 	method: IHttpRequestOptions["method"],

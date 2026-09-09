@@ -8,6 +8,7 @@ import {
 } from "n8n-workflow";
 
 import { ssRequest } from "../../helpers/apiclient";
+import { runEntitySearch } from "../../helpers/searchRequest";
 import {
 	buildTypeMap,
 	loadContactProperties,
@@ -550,6 +551,13 @@ export async function handleContact(
 
 		case "searchContacts": {
 			const nodeVersion = this.getNode().typeVersion ?? 1;
+
+			if (nodeVersion >= 3) {
+				return await runEntitySearch(this, i, {
+					path: "/v2/contact/search",
+					resultKey: "contacts",
+				});
+			}
 
 			if (nodeVersion >= 2) {
 				const filterId = (
