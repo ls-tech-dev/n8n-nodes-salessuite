@@ -9,6 +9,7 @@ import {
 } from "../../helpers/call-activity";
 import { ssRequest } from "../../helpers/apiclient";
 import {
+	getDisplayName,
 	getTypeDefinition,
 	loadContactPersonProperties,
 } from "../../helpers/fieldMapping";
@@ -116,8 +117,17 @@ function toCallResultOption(
 	}
 }
 
-/** Load phone call activity types from API */
-export async function loadPhoneCallActivityTypes(
+const ANY_CALL_TYPE: INodePropertyOptions = {
+	name: "Any Call Type",
+	value: "any",
+};
+
+const ANY_CALL_RESULT: INodePropertyOptions = {
+	name: "Any Call Result",
+	value: "any",
+};
+
+export async function loadPhoneCallActivityTypesForCreate(
 	this: ILoadOptionsFunctions,
 ): Promise<INodePropertyOptions[]> {
 	const list = (await ssRequest(
@@ -125,17 +135,22 @@ export async function loadPhoneCallActivityTypes(
 		"GET",
 		"/v1/call-types",
 	)) as CallTypePayload[];
+	return (list ?? []).map((t: CallTypePayload) => ({
+		name: t.category ? `${t.name} (${t.category})` : t.name,
+		value: String(t.id),
+	}));
+}
+
+export async function loadPhoneCallActivityTypes(
+	this: ILoadOptionsFunctions,
+): Promise<INodePropertyOptions[]> {
 	return [
-		{ name: "Any Call Type", value: "any" },
-		...(list ?? []).map((t: CallTypePayload) => ({
-			name: t.category ? `${t.name} (${t.category})` : t.name,
-			value: String(t.id),
-		})),
+		ANY_CALL_TYPE,
+		...(await loadPhoneCallActivityTypesForCreate.call(this)),
 	];
 }
 
-/** Load call result types depending on selected call type (or any) */
-export async function loadCallResultTypes(
+export async function loadCallResultTypesForCreate(
 	this: ILoadOptionsFunctions,
 ): Promise<INodePropertyOptions[]> {
 	let callTypeId = "";
@@ -160,11 +175,15 @@ export async function loadCallResultTypes(
 	)) as CallTypePayload[];
 	const selectedCallTypeId =
 		callTypeId && callTypeId !== "any" ? callTypeId : undefined;
-	const options = buildCallResultOptions(list ?? [], selectedCallTypeId);
-	return [
-		{ name: "Any Call Result", value: "any" },
-		...options.map(toCallResultOption),
-	];
+	return buildCallResultOptions(list ?? [], selectedCallTypeId).map(
+		toCallResultOption,
+	);
+}
+
+export async function loadCallResultTypes(
+	this: ILoadOptionsFunctions,
+): Promise<INodePropertyOptions[]> {
+	return [ANY_CALL_RESULT, ...(await loadCallResultTypesForCreate.call(this))];
 }
 
 type ContactPersonLite = {
@@ -204,6 +223,8 @@ function personLabel(person: ContactPersonLite): string {
 async function loadPhoneFields(
 	ctx: ILoadOptionsFunctions,
 ): Promise<Map<string, string>> {
+	// Seeded so the standard field is offered even when the definitions cannot be
+	// loaded; the API's own localized label replaces this label below.
 	const fields = new Map<string, string>([["phone", "Phone"]]);
 	try {
 		const props = await loadContactPersonProperties(ctx);
@@ -212,10 +233,7 @@ async function loadPhoneFields(
 				| { variant?: string }
 				| undefined;
 			if (typeDef?.variant === "phone") {
-				fields.set(
-					prop.propertyIdentifier,
-					prop.dynamicTypeDefinition?.fieldName || prop.propertyIdentifier,
-				);
+				fields.set(prop.propertyIdentifier, getDisplayName(prop));
 			}
 		}
 	} catch {

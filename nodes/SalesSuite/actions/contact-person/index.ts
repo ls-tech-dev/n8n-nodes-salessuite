@@ -70,16 +70,6 @@ export const contactPersonFields: INodeProperties[] = [
 			"Whether this contact person becomes the main contact person of the contact",
 	},
 	{
-		displayName:
-			"Only Contact Person fields are sent; contact fields are ignored.",
-		name: "contactPersonCreateInfo",
-		type: "notice",
-		default: "",
-		displayOptions: {
-			show: { resource: ["contactPerson"], operation: ["create"] },
-		},
-	},
-	{
 		displayName: "Fields",
 		name: "fields",
 		type: "resourceMapper",
@@ -125,16 +115,6 @@ export const contactPersonFields: INodeProperties[] = [
 
 	// ===== UPDATE =====
 	{
-		displayName:
-			"Only Contact Person fields are sent; contact fields are ignored.",
-		name: "contactPersonUpdateInfo",
-		type: "notice",
-		default: "",
-		displayOptions: {
-			show: { resource: ["contactPerson"], operation: ["update"] },
-		},
-	},
-	{
 		displayName: "Fields",
 		name: "fields",
 		type: "resourceMapper",
@@ -156,5 +136,38 @@ export const contactPersonFields: INodeProperties[] = [
 		},
 		description:
 			"Fields to update. Leave fields empty to keep their current value.",
+	},
+
+	// ===== SHARED (create / update) =====
+	{
+		displayName: "Email Duplicate Check",
+		name: "contactPersonEmailDuplicateCheckMode",
+		type: "options",
+		default: "allow",
+		displayOptions: {
+			show: { resource: ["contactPerson"], operation: ["create", "update"] },
+		},
+		options: [
+			{
+				name: "Allow Duplicates",
+				value: "allow",
+				description:
+					"Skip the duplicate check. API default, kept for backward compatibility.",
+			},
+			{
+				name: "Reject Anywhere",
+				value: "none",
+				description:
+					"Reject the email if it exists on any non-archived contact. Recommended for new integrations.",
+			},
+			{
+				name: "Reject Within Same Contact",
+				value: "sameContact",
+				description:
+					"Reject the email only if it already exists on the same contact",
+			},
+		],
+		description:
+			"How the API handles a contact-person email that already exists",
 	},
 ];

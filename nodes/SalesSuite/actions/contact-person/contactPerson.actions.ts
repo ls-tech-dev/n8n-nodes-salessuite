@@ -55,6 +55,12 @@ export async function handleContactPerson(
 				false,
 			) as boolean;
 
+			const contactPersonEmailDuplicateCheckMode = this.getNodeParameter(
+				"contactPersonEmailDuplicateCheckMode",
+				i,
+				"allow",
+			) as string;
+
 			const fieldsParam = this.getNodeParameter("fields", i, {} as IDataObject);
 			const contactPerson = await sanitizeContactPersonPayload.call(
 				this,
@@ -65,14 +71,20 @@ export async function handleContactPerson(
 				throw new ApplicationError("Create Contact Person requires an email.");
 			}
 
+			// The duplicate-check mode sits next to contactPerson, not inside it:
+			// CreateContactPersonRequest is additionalProperties: false.
+			const body = {
+				contactId,
+				contactPerson,
+				makeMainContactPerson,
+				contactPersonEmailDuplicateCheckMode,
+			};
+
 			const result = await ssRequest(this, "POST", "/v1/contact-person", {
-				body: { contactId, contactPerson, makeMainContactPerson },
+				body,
 			});
 
-			return {
-				...(result ?? {}),
-				inputData: { contactId, contactPerson, makeMainContactPerson },
-			};
+			return { ...(result ?? {}), inputData: body };
 		}
 
 		case "update": {
@@ -86,9 +98,18 @@ export async function handleContactPerson(
 			const fieldsParam = this.getNodeParameter("fields", i, {} as IDataObject);
 			const body = await sanitizeContactPersonPayload.call(this, fieldsParam);
 
+			// Checked before the mode is added: it is a request option, not a field,
+			// and on its own it would not be an update.
 			if (Object.keys(body).length === 0) {
 				throw new ApplicationError("No fields provided to update.");
 			}
+
+			// UpdateContactPersonInput carries the mode in the flat body itself.
+			body.contactPersonEmailDuplicateCheckMode = this.getNodeParameter(
+				"contactPersonEmailDuplicateCheckMode",
+				i,
+				"allow",
+			) as string;
 
 			const result = await ssRequest(
 				this,

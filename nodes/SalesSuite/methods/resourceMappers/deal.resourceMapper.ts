@@ -15,6 +15,8 @@ import {
 	sortCardProperties,
 	sortCardsByCreatedAt,
 } from "../../helpers/fieldMapping";
+import { getCredentialLanguage } from "../../helpers/apiclient";
+import { joinFieldAndGroupLabel } from "../../helpers/labels";
 import { canUsePropertyAsField } from "./canUsePropertyAsField";
 import { mapTypeToResourceMapper } from "./mapTypeToResourceMapper";
 
@@ -23,6 +25,7 @@ export async function getDealResourceMapperFields(
 ): Promise<ResourceMapperFields> {
 	const data = await loadDealFieldData(this);
 	const properties = await loadDealProperties(this);
+	const language = await getCredentialLanguage(this);
 	const cards = sortCardsByCreatedAt(
 		Array.isArray(data?.cards) ? data.cards : [],
 	);
@@ -50,7 +53,7 @@ export async function getDealResourceMapperFields(
 
 		const entry = {
 			id: key,
-			displayName: `${fieldLabel} - ${groupLabel}`,
+			displayName: joinFieldAndGroupLabel(fieldLabel, groupLabel),
 			required: !!(field.required ?? property.required),
 			canBeUsedToMatch: false,
 			defaultMatch: false,
@@ -69,7 +72,10 @@ export async function getDealResourceMapperFields(
 	if (cards.length > 0) {
 		for (const card of cards) {
 			const cardLabel = getCardDisplayName(card);
-			for (const field of sortCardProperties(card.propertyDefinitions ?? [])) {
+			for (const field of sortCardProperties(
+				card.propertyDefinitions ?? [],
+				language,
+			)) {
 				addField(field, cardLabel);
 			}
 		}

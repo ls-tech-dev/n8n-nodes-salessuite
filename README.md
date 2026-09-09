@@ -28,7 +28,7 @@ The integration was developed for SalesSuite and is maintained by Jörg Sebening
 | **Find Contact by Email**            | Retrieve contacts using their email address.                                            |
 | **Get Contact by ID**                | Fetch a specific contact using its unique ID.                                            |
 | **List Contacts**                    | Browse contacts with pagination support.                                                |
-| **Search Contacts**                  | Perform text-based search across contacts.                                              |
+| **Search Contacts**                  | Filter contacts with a structured condition builder (property picker, per-type operators, relative dates, OR groups) plus multi-column sorting. Node v1 keeps the plain text search. |
 | **Update Contact**                   | Modify contact details by ID.                                                           |
 | **Upsert Contact**                   | Search by email and update if found, otherwise create a new contact.                    |
 
@@ -43,6 +43,7 @@ The integration was developed for SalesSuite and is maintained by Jörg Sebening
 | **Find Deals by Email** | Get all deals connected to a contact’s email.                               |
 | **List Deals**          | View deals with pagination (optional filtering by pipeline).                |
 | **List Pipelines**      | Retrieve available pipelines along with their phases.                       |
+| **Search Deals**        | Filter deals with the structured condition builder, optionally scoped to a pipeline or phase. |
 | **Update Deal**         | Update deal properties and optionally move it to another phase or pipeline. |
 
 ---
@@ -87,7 +88,7 @@ The integration was developed for SalesSuite and is maintained by Jörg Sebening
 
 The node uses **API Key authentication**.
 
-* Base endpoint: `https://api.salessuite.com/api/v1`
+* Base endpoint: `https://api.salessuite.com/api`
 * Required header:
 
   ```
@@ -95,6 +96,17 @@ The node uses **API Key authentication**.
   ```
 
 A built-in credential test within n8n ensures your API key is valid before running workflows.
+
+The credential also carries a **Response Language** option (`Deutsch (DE)` / `English (EN)`,
+default `Deutsch (DE)`), sent as the `x-lang` header so endpoints that return translated text answer
+in the selected language. Credentials saved before this option existed keep using the tenant default
+locale until they are saved again. Resolution order on the API side: `lang` query parameter →
+`x-lang` / `accept-language` → tenant default locale (Settings > General) → global fallback `en`.
+
+The selection also drives the **field and group labels** shown in the field mappers and in the
+property dropdowns of the node, trigger and webhook — the node resolves those names through
+`GET /v1/property`, which honours the header. Custom (`x_*`) fields always keep the name you gave
+them in SalesSuite.
 
 ---
 

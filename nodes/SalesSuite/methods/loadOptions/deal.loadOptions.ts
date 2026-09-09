@@ -74,3 +74,18 @@ export async function getStagesByPipeline(
 		value: phase.id,
 	}));
 }
+
+export async function getSearchScopePipelines(
+	this: ILoadOptionsFunctions,
+): Promise<INodePropertyOptions[]> {
+	const pipelines = await getPipelines.call(this);
+	return [{ name: "- All Pipelines -", value: "" }, ...pipelines];
+}
+
+export async function getSearchScopePhases(
+	this: ILoadOptionsFunctions,
+): Promise<INodePropertyOptions[]> {
+	const phases = await getStagesByPipeline.call(this);
+	if (phases.length === 1 && phases[0]?.value === "") return phases;
+	return [{ name: "- All Phases -", value: "" }, ...phases];
+}

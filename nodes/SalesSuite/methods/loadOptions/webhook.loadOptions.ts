@@ -1,6 +1,7 @@
 import { ILoadOptionsFunctions, INodePropertyOptions } from "n8n-workflow";
 
-import { ssRequest } from "../../helpers/apiclient";
+import { getCredentialLanguage, ssRequest } from "../../helpers/apiclient";
+import { compareLabels } from "../../helpers/labels";
 import {
 	getDisplayName,
 	loadContactProperties,
@@ -67,6 +68,7 @@ export async function getWebhookProperties(
 
 	if (trigger === "contact.propertyChanged") {
 		const properties = await loadContactProperties(this);
+		const language = await getCredentialLanguage(this);
 
 		const opts = properties
 			.filter(
@@ -75,9 +77,7 @@ export async function getWebhookProperties(
 					p.dynamicDbTableName === "ContactPerson",
 			)
 			.sort((a, b) =>
-				getDisplayName(a).localeCompare(getDisplayName(b), "en", {
-					sensitivity: "base",
-				}),
+				compareLabels(language)(getDisplayName(a), getDisplayName(b)),
 			)
 			.map((p) => ({ name: getDisplayName(p), value: p.propertyIdentifier }));
 		return opts.length ? opts : [{ name: "No Properties Found", value: "" }];
@@ -85,12 +85,11 @@ export async function getWebhookProperties(
 
 	if (trigger === "deal.propertyChanged") {
 		const properties = await loadDealProperties(this);
+		const language = await getCredentialLanguage(this);
 		const opts = properties
 			.filter((p) => p.dynamicDbTableName === "Deal")
 			.sort((a, b) =>
-				getDisplayName(a).localeCompare(getDisplayName(b), "en", {
-					sensitivity: "base",
-				}),
+				compareLabels(language)(getDisplayName(a), getDisplayName(b)),
 			)
 			.map((p) => ({ name: getDisplayName(p), value: p.propertyIdentifier }));
 		return opts.length ? opts : [{ name: "No Properties Found", value: "" }];
